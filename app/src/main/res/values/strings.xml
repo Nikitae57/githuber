@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">githubApp</string>
+    <string name="hint">Введите название репозитория</string>
+    <string name="seach">Искать</string>
+    <string name="URL">URL</string>
+    <string name="error">Возникла ошибка</string>
+</resources>
