@@ -1,7 +1,14 @@
 <resources>
     <string name="app_name">githubApp</string>
     <string name="hint">Введите название репозитория</string>
-    <string name="seach">Искать</string>
+    <string name="search">Искать</string>
     <string name="URL">URL</string>
     <string name="error">Возникла ошибка</string>
+    <string name="sortBy">сортировать:</string>
+    <string-array name="sortVariants">
+        <item>лучшее совпадение</item>
+        <item>больше звёзд</item>
+        <item>больше ответвлений</item>
+        <item>обновлялись недавно</item>
+    </string-array>
 </resources>

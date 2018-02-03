@@ -19,12 +19,30 @@ public class NetworkUtil {
     final static String GITHUB_BASE_URL = "https://api.github.com/search/repositories";
     final static String PARAM_QUERY = "q";
     final static String PARAM_SORT = "sort";
-    final static String sortBy = "stars";
+    private static String sortBy;
 
-    public static URL makeURL(String query) {
-        Uri uri = Uri.parse(GITHUB_BASE_URL).buildUpon().
-                appendQueryParameter(PARAM_QUERY, query).
-                appendQueryParameter(PARAM_SORT, sortBy).build();
+    public static URL makeURL(String query, SORT_BY sort_by) {
+
+        Uri uri;
+        if (sort_by == SORT_BY.BEST_MATCH) {
+            uri = Uri.parse(GITHUB_BASE_URL).buildUpon().
+                    appendQueryParameter(PARAM_QUERY, query).build();
+        } else {
+            switch (sort_by) {
+                case MOST_STARS: sortBy = "stars";
+                break;
+
+                case MOST_FORKS: sortBy = "forks";
+                break;
+
+                case RECENTLY_UPDATED: sortBy = "updated";
+                break;
+            }
+
+            uri = Uri.parse(GITHUB_BASE_URL).buildUpon().
+                    appendQueryParameter(PARAM_QUERY, query).
+                    appendQueryParameter(PARAM_SORT, sortBy).build();
+        }
 
         URL url = null;
         try {
@@ -56,5 +74,9 @@ public class NetworkUtil {
         }
 
         return result;
+    }
+
+    public enum SORT_BY {
+        BEST_MATCH, MOST_STARS, MOST_FORKS, RECENTLY_UPDATED
     }
 }

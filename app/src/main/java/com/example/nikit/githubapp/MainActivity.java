@@ -8,8 +8,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressBar;
     TextView tvQueryUrl;
     TextView tvError;
+    Spinner spinnerSortBy;
 
     JSONArray itemsArray;
 
@@ -43,35 +46,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rvListItems);
         tvQueryUrl = findViewById(R.id.tvQueryUrl);
         tvError = findViewById(R.id.tvError);
+        spinnerSortBy = findViewById(R.id.sortBy);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        if (item.getItemId() == R.id.btnSearch) {
-
-            String repoToSearch = String.valueOf(searchField.getText());
-            URL url = NetworkUtil.makeURL(repoToSearch);
-
-            String displayURL = "URL: " + url.toString();
-            tvQueryUrl.setText(displayURL);
-
-            QueryTask queryTask = new QueryTask();
-            queryTask.execute(url);
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void makeUpData(String s) {
@@ -90,6 +68,38 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void makeSearchQuery(View view) {
+        String repoToSearch = String.valueOf(searchField.getText());
+        String sortBy = spinnerSortBy.getSelectedItem().toString();
+
+        NetworkUtil.SORT_BY sort_by = null;
+        switch (sortBy) {
+            case "лучшее совпадение":
+                sort_by = NetworkUtil.SORT_BY.BEST_MATCH;
+            break;
+
+            case "больше звёзд":
+                sort_by = NetworkUtil.SORT_BY.MOST_STARS;
+            break;
+
+            case "больше ответвлений":
+                sort_by = NetworkUtil.SORT_BY.MOST_FORKS;
+            break;
+
+            case "обновлялись недавно":
+                sort_by = NetworkUtil.SORT_BY.RECENTLY_UPDATED;
+            break;
+        }
+
+        URL url = NetworkUtil.makeURL(repoToSearch, sort_by);
+
+        String displayURL = "URL: " + url.toString();
+        tvQueryUrl.setText(displayURL);
+
+        QueryTask queryTask = new QueryTask();
+        queryTask.execute(url);
     }
 
     class QueryTask extends AsyncTask<URL, Void, String> {
