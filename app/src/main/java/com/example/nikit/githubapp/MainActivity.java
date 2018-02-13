@@ -57,11 +57,7 @@ public class MainActivity extends AppCompatActivity {
             JSONObject jsonRespond = new JSONObject(s);
             int numberOfItems = jsonRespond.getJSONArray("items").length();
 
-            if (numberOfItems > 100) {
-                NUMBER_OF_ITEMS = 100;
-            } else {
-                NUMBER_OF_ITEMS = numberOfItems;
-            }
+            NUMBER_OF_ITEMS = numberOfItems > 100 ? 100 : numberOfItems;
 
             itemsArray = jsonRespond.getJSONArray("items");
             recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, itemsArray));

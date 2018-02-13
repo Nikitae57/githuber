@@ -45,10 +45,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView listItem;
+        TextView starsCounter;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             listItem = itemView.findViewById(R.id.tvItem);
+            starsCounter = itemView.findViewById(R.id.tvStars);
         }
 
         JSONObject jsonObject;
@@ -56,6 +58,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             try {
                 jsonObject = (JSONObject) itemsArray.get(index);
                 listItem.setText(jsonObject.getString("full_name"));
+                starsCounter.append(jsonObject.getString("stargazers_count"));
+
             } catch (JSONException ex) {
                 ex.printStackTrace();
             }
