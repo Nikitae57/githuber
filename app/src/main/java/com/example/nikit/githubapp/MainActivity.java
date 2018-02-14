@@ -1,5 +1,6 @@
 package com.example.nikit.githubapp;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -30,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     EditText searchField;
     ProgressBar progressBar;
-    TextView tvQueryUrl;
     TextView tvError;
     Spinner spinnerSortBy;
 
@@ -44,12 +46,28 @@ public class MainActivity extends AppCompatActivity {
         searchField = findViewById(R.id.etQuery);
         progressBar = findViewById(R.id.progressBar);
         recyclerView = findViewById(R.id.rvListItems);
-        tvQueryUrl = findViewById(R.id.tvQueryUrl);
         tvError = findViewById(R.id.tvError);
         spinnerSortBy = findViewById(R.id.sortBy);
 
+        spinnerSortBy.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                makeSearchQuery(null);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
     }
 
     private void makeUpData(String s) {
@@ -66,8 +84,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void hideKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
     public void makeSearchQuery(View view) {
+
         String repoToSearch = String.valueOf(searchField.getText());
+        if (repoToSearch == null || repoToSearch.equals("")) {
+            return;
+        }
+
         String sortBy = spinnerSortBy.getSelectedItem().toString();
 
         NetworkUtil.SORT_BY sort_by = null;
@@ -92,10 +123,11 @@ public class MainActivity extends AppCompatActivity {
         URL url = NetworkUtil.makeURL(repoToSearch, sort_by);
 
         String displayURL = "URL: " + url.toString();
-        tvQueryUrl.setText(displayURL);
 
         QueryTask queryTask = new QueryTask();
         queryTask.execute(url);
+
+        hideKeyboard();
     }
 
     class QueryTask extends AsyncTask<URL, Void, String> {
