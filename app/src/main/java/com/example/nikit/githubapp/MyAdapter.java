@@ -1,6 +1,7 @@
 package com.example.nikit.githubapp;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     private int mItemNumber;
     private JSONArray itemsArray;
+    private boolean descriptionIsShown;
 
     public MyAdapter(int mItemNumber, JSONArray itemsArray) {
         this.itemsArray = itemsArray;
@@ -42,26 +44,55 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         return mItemNumber;
     }
 
-    class MyViewHolder extends RecyclerView.ViewHolder {
+    class MyViewHolder extends RecyclerView.ViewHolder
+        implements View.OnClickListener {
 
-        TextView listItem;
+        TextView fullName;
         TextView starsCounter;
+        TextView description;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            listItem = itemView.findViewById(R.id.tvItem);
+            fullName = itemView.findViewById(R.id.tvItem);
             starsCounter = itemView.findViewById(R.id.tvStars);
+
+            description = itemView.findViewById(R.id.description);
+            descriptionIsShown = false;
+            description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
+
+            itemView.setOnClickListener(this);
         }
 
         JSONObject jsonObject;
+        String descriptionText;
         public void bind(int index) {
             try {
                 jsonObject = (JSONObject) itemsArray.get(index);
-                listItem.setText(jsonObject.getString("full_name"));
+                fullName.setText(jsonObject.getString("full_name"));
                 starsCounter.append(jsonObject.getString("stargazers_count"));
+                descriptionText = jsonObject.getString("description");
 
             } catch (JSONException ex) {
                 ex.printStackTrace();
+            }
+        }
+
+
+        @Override
+        public void onClick(View view) {
+            if (descriptionText == null || descriptionText.equals(""))
+                return;
+
+            if (!descriptionIsShown) {
+
+                description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                description.setText(descriptionText);
+                descriptionIsShown = true;
+
+            } else {
+                description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
+                description.setText("");
+                descriptionIsShown = false;
             }
         }
     }
