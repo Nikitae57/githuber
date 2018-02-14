@@ -11,6 +11,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+
 /**
  * Created by nikit on 01.02.2018.
  */
@@ -19,11 +21,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     private int mItemNumber;
     private JSONArray itemsArray;
-    private boolean descriptionIsShown;
+    private boolean descriptionStateArray[];
 
     public MyAdapter(int mItemNumber, JSONArray itemsArray) {
         this.itemsArray = itemsArray;
         this.mItemNumber = mItemNumber;
+
+        descriptionStateArray = new boolean[mItemNumber];
+        Arrays.fill(descriptionStateArray, false);
     }
 
     @Override
@@ -47,9 +52,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     class MyViewHolder extends RecyclerView.ViewHolder
         implements View.OnClickListener {
 
-        TextView fullName;
-        TextView starsCounter;
-        TextView description;
+        TextView fullName, starsCounter, description,
+                 language, forkNumber;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -57,18 +61,19 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             starsCounter = itemView.findViewById(R.id.tvStars);
 
             description = itemView.findViewById(R.id.description);
-            descriptionIsShown = false;
             description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
+
+            language = itemView.findViewById(R.id.tvLanguage);
+            forkNumber = itemView.findViewById(R.id.tvFork);
 
             itemView.setOnClickListener(this);
         }
 
+
         JSONObject jsonObject;
-        String descriptionText;
         public void bind(int index) {
 
             try {
-
                 jsonObject = (JSONObject) itemsArray.get(index);
 
                 StringBuilder starsNumberStr = new StringBuilder("★");
@@ -83,9 +88,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     starsNumberStr = starsNumberStr.append((int) starsNumberDouble);
                 }
 
-                fullName.setText(jsonObject.getString("full_name"));
                 starsCounter.setText(starsNumberStr);
-                descriptionText = jsonObject.getString("description");
+                fullName.setText(jsonObject.getString("full_name"));
+                description.setText(jsonObject.getString("description"));
+                forkNumber.setText(jsonObject.getString("forks_count"));
+                language.setText(jsonObject.getString("language"));
+
+                if (descriptionStateArray[index]) {
+                    description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+                } else {
+                    description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
+                }
 
             } catch (JSONException ex) {
                 ex.printStackTrace();
@@ -94,19 +107,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         @Override
         public void onClick(View view) {
-            if (descriptionText == null || descriptionText.equals(""))
-                return;
-
-            if (!descriptionIsShown) {
+            int position = this.getAdapterPosition();
+            if (!descriptionStateArray[position]) {
 
                 description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-                description.setText(descriptionText);
-                descriptionIsShown = true;
+                descriptionStateArray[position] = true;
 
             } else {
                 description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
-                description.setText("");
-                descriptionIsShown = false;
+                descriptionStateArray[position] = false;
             }
         }
     }
