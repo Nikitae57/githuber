@@ -66,17 +66,31 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         JSONObject jsonObject;
         String descriptionText;
         public void bind(int index) {
+
             try {
+
                 jsonObject = (JSONObject) itemsArray.get(index);
+
+                StringBuilder starsNumberStr = new StringBuilder("★");
+                double starsNumberDouble = jsonObject.getDouble("stargazers_count");
+                if (starsNumberDouble > 1000) {
+
+                    starsNumberDouble /= 1000;
+                    starsNumberDouble = (double) Math.round(starsNumberDouble * 10) / 10;
+                    starsNumberStr = starsNumberStr.append(String.valueOf(starsNumberDouble)).append("k");
+
+                } else {
+                    starsNumberStr = starsNumberStr.append((int) starsNumberDouble);
+                }
+
                 fullName.setText(jsonObject.getString("full_name"));
-                starsCounter.append(jsonObject.getString("stargazers_count"));
+                starsCounter.setText(starsNumberStr);
                 descriptionText = jsonObject.getString("description");
 
             } catch (JSONException ex) {
                 ex.printStackTrace();
             }
         }
-
 
         @Override
         public void onClick(View view) {
