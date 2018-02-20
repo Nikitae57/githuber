@@ -5,6 +5,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -54,11 +55,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         TextView fullName, starsCounter, description,
                  language, forkNumber;
+        ImageView languageImage;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             fullName = itemView.findViewById(R.id.tvItem);
             starsCounter = itemView.findViewById(R.id.tvStars);
+
+            languageImage = itemView.findViewById(R.id.imageLanguage);
 
             description = itemView.findViewById(R.id.description);
             description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
@@ -69,13 +73,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             itemView.setOnClickListener(this);
         }
 
-
         JSONObject jsonObject;
         public void bind(int index) {
 
             try {
                 jsonObject = (JSONObject) itemsArray.get(index);
 
+                // Setting stars count, depending in it's number
                 StringBuilder starsNumberStr = new StringBuilder("★");
                 double starsNumberDouble = jsonObject.getDouble("stargazers_count");
                 if (starsNumberDouble > 1000) {
@@ -83,22 +87,35 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     starsNumberDouble /= 1000;
                     starsNumberDouble = (double) Math.round(starsNumberDouble * 10) / 10;
                     starsNumberStr = starsNumberStr.append(String.valueOf(starsNumberDouble)).append("k");
-
                 } else {
                     starsNumberStr = starsNumberStr.append((int) starsNumberDouble);
                 }
 
-                starsCounter.setText(starsNumberStr);
-                fullName.setText(jsonObject.getString("full_name"));
-                description.setText(jsonObject.getString("description"));
-                forkNumber.setText(jsonObject.getString("forks_count"));
-                language.setText(jsonObject.getString("language"));
+                // Show description only if it's provided
+                String descriptionText = jsonObject.getString("description");
+                if (descriptionText != null && !descriptionText.equals("")) {
+                    description.setText(jsonObject.getString("description"));
+                }
 
+                // If no language, remove language image
+                String languageText = jsonObject.getString("language");
+                if (languageText == null || languageText.equals("") || languageText.equals("null")) {
+                    languageImage.setVisibility(View.INVISIBLE);
+                    language.setText("");
+                } else {
+                    language.setText(jsonObject.getString("language"));
+                }
+
+                // If description was viewed and scrolled out, show it again
                 if (descriptionStateArray[index]) {
                     description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
                 } else {
                     description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
                 }
+
+                starsCounter.setText(starsNumberStr);
+                fullName.setText(jsonObject.getString("full_name"));
+                forkNumber.setText(jsonObject.getString("forks_count"));
 
             } catch (JSONException ex) {
                 ex.printStackTrace();
@@ -107,6 +124,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         @Override
         public void onClick(View view) {
+
+            // If description isn't shown, show it. If shown, hide
             int position = this.getAdapterPosition();
             if (!descriptionStateArray[position]) {
 
