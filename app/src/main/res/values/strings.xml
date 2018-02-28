@@ -12,4 +12,5 @@
         <item>больше ответвлений</item>
         <item>обновлялись недавно</item>
     </string-array>
+    <string name="openRepo">Открыть репозиторий</string>
 </resources>

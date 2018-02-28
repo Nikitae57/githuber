@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int NUMBER_OF_ITEMS;
 
+    public static Context context;
+
     RecyclerView recyclerView;
     EditText searchField;
     ProgressBar progressBar;
@@ -42,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        context = getApplicationContext();
 
         searchField = findViewById(R.id.etQuery);
         progressBar = findViewById(R.id.progressBar);
