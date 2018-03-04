@@ -2,9 +2,7 @@ package com.example.nikit.githubapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -20,9 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 
 /**
  * Created by nikit on 01.02.2018.
@@ -161,7 +157,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
             URL readmeUrl = NetworkUtil.makeRadmeUrl(repoFullName);
 
-            Intent readmeIntent = new Intent(context, ReadmeActicity.class);
+            Intent readmeIntent = new Intent(context, ReadmeActivity.class);
             readmeIntent.putExtra(Intent.EXTRA_TEXT, readmeUrl.toString());
             context.startActivity(readmeIntent);
         }
