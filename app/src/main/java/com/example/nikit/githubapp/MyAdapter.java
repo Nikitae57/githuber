@@ -124,7 +124,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
                 // Show description only if it's provided
                 String descriptionText = jsonObject.getString("description");
-                if (descriptionText != null && !descriptionText.equals("")) {
+                if (descriptionText == null || descriptionText.equals("") || descriptionText.equals("null")) {
+                    description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
+                } else {
                     description.setText(jsonObject.getString("description"));
                 }
 
