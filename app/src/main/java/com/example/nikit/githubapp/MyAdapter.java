@@ -1,10 +1,14 @@
 package com.example.nikit.githubapp;
 
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.Arrays;
 
 /**
@@ -56,6 +61,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         TextView fullName, starsCounter, description,
                  language, forkNumber;
         ImageView languageImage;
+        ImageButton btn_openRepo;
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -69,6 +75,28 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
             language = itemView.findViewById(R.id.tvLanguage);
             forkNumber = itemView.findViewById(R.id.tvFork);
+
+            btn_openRepo = itemView.findViewById(R.id.btn_openRepo);
+            btn_openRepo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    try {
+                        int position = getAdapterPosition();
+                        String urlStr = ((JSONObject) itemsArray.get(position)).getString("html_url");
+
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(urlStr));
+
+                        if (intent.resolveActivity(MainActivity.context.getPackageManager()) != null) {
+                            MainActivity.context.startActivity(intent);
+                        }
+
+                    } catch (JSONException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
 
             itemView.setOnClickListener(this);
         }
