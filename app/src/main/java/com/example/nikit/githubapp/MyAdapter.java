@@ -1,8 +1,10 @@
 package com.example.nikit.githubapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -12,10 +14,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.nikit.githubapp.networkUtil.NetworkUtil;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -27,14 +32,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     private int mItemNumber;
     private JSONArray itemsArray;
-    private boolean descriptionStateArray[];
+    private Context context;
 
-    public MyAdapter(int mItemNumber, JSONArray itemsArray) {
+    public MyAdapter(int mItemNumber, JSONArray itemsArray, Context context) {
         this.itemsArray = itemsArray;
         this.mItemNumber = mItemNumber;
-
-        descriptionStateArray = new boolean[mItemNumber];
-        Arrays.fill(descriptionStateArray, false);
+        this.context = context;
     }
 
     @Override
@@ -71,7 +74,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             languageImage = itemView.findViewById(R.id.imageLanguage);
 
             description = itemView.findViewById(R.id.description);
-            description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
+            description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
 
             language = itemView.findViewById(R.id.tvLanguage);
             forkNumber = itemView.findViewById(R.id.tvFork);
@@ -98,7 +101,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 }
             });
 
-            itemView.setOnClickListener(this);
+            description.setOnClickListener(this);
         }
 
         JSONObject jsonObject;
@@ -134,13 +137,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     language.setText(jsonObject.getString("language"));
                 }
 
-                // If description was viewed and scrolled out, show it again
-                if (descriptionStateArray[index]) {
-                    description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-                } else {
-                    description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
-                }
-
                 starsCounter.setText(starsNumberStr);
                 fullName.setText(jsonObject.getString("full_name"));
                 forkNumber.setText(jsonObject.getString("forks_count"));
@@ -152,18 +148,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         @Override
         public void onClick(View view) {
+            int position = getAdapterPosition();
 
-            // If description isn't shown, show it. If shown, hide
-            int position = this.getAdapterPosition();
-            if (!descriptionStateArray[position]) {
-
-                description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-                descriptionStateArray[position] = true;
-
-            } else {
-                description.setTextSize(TypedValue.COMPLEX_UNIT_SP, 0);
-                descriptionStateArray[position] = false;
+            String repoFullName = null;
+            try {
+                repoFullName = ((JSONObject) itemsArray.get(position)).getString("full_name");
+            } catch (JSONException ex) {
+                ex.printStackTrace();
             }
+
+            URL readmeUrl = NetworkUtil.makeRadmeUrl(repoFullName);
+
+            Intent readmeIntent = new Intent(context, ReadmeActicity.class);
+            readmeIntent.putExtra(Intent.EXTRA_TEXT, readmeUrl.toString());
+            context.startActivity(readmeIntent);
         }
     }
 }

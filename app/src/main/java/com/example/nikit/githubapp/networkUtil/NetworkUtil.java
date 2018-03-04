@@ -21,6 +21,8 @@ public class NetworkUtil {
     final static String PARAM_SORT = "sort";
     private static String sortBy;
 
+    final static String README_BASE_URL = "https://api.github.com/repos";
+
     public static URL makeURL(String query, SORT_BY sort_by) {
 
         Uri uri;
@@ -74,6 +76,25 @@ public class NetworkUtil {
         }
 
         return result;
+    }
+
+    public static URL makeRadmeUrl(String fullName) {
+
+        if (fullName == null || fullName.equals("")) {
+            throw new NullPointerException();
+        }
+
+        URL url = null;
+        try {
+            StringBuilder urlStr = new StringBuilder(README_BASE_URL);
+            urlStr.append("/").append(fullName).append("/readme");
+            url = new URL(urlStr.toString());
+
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+
+        return url;
     }
 
     public enum SORT_BY {

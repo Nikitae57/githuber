@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             NUMBER_OF_ITEMS = numberOfItems > 100 ? 100 : numberOfItems;
 
             itemsArray = jsonRespond.getJSONArray("items");
-            recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, itemsArray));
+            recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, itemsArray, this));
         } catch (JSONException ex) {
             ex.printStackTrace();
         }
