@@ -101,7 +101,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 }
             });
 
-            description.setOnClickListener(this);
+            itemView.setOnClickListener(this);
         }
 
         JSONObject jsonObject;
