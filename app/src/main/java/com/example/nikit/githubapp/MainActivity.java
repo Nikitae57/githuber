@@ -126,8 +126,6 @@ public class MainActivity extends AppCompatActivity {
 
         URL url = NetworkUtil.makeURL(repoToSearch, sort_by);
 
-        String displayURL = "URL: " + url.toString();
-
         QueryTask queryTask = new QueryTask();
         queryTask.execute(url);
 

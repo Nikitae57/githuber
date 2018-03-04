@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
@@ -17,16 +20,19 @@ import java.net.URL;
 
 public class ReadmeActivity extends AppCompatActivity {
 
-    TextView tvReadme;
+    TextView tvReadme, tvError;
+    ProgressBar progressBar;
+    ScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_readme);
 
-
-
+        progressBar = findViewById(R.id.pb_ReadmeProgressbar);
         tvReadme = findViewById(R.id.tv_readme);
+        tvError = findViewById(R.id.tv_ReadmeError);
+        scrollView = findViewById(R.id.sv_readmeScrollView);
 
         URL readmeUrl = null;
         Intent receivedIntent = getIntent();
@@ -44,12 +50,10 @@ public class ReadmeActivity extends AppCompatActivity {
 
     class QueryReadmeTask extends AsyncTask<URL, Void, String> {
 
-        /*
         @Override
         protected void onPreExecute() {
             showProgressBar();
         }
-        */
 
         @Override
         protected String doInBackground(URL... urls) {
@@ -73,16 +77,34 @@ public class ReadmeActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
 
-            /*
             if (s == null || s.equals("")) {
                 showError();
                 return;
             }
 
-            showResult(s);
-            */
-
+            showResult();
             tvReadme.setText(s);
         }
+    }
+
+    private void showProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+
+        scrollView.setVisibility(View.INVISIBLE);
+        tvError.setVisibility(View.INVISIBLE);
+    }
+
+    private void showError() {
+        tvError.setVisibility(View.VISIBLE);
+
+        scrollView.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void showResult() {
+        scrollView.setVisibility(View.VISIBLE);
+
+        tvError.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }
