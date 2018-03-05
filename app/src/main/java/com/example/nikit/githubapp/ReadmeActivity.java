@@ -18,11 +18,14 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import us.feras.mdv.MarkdownView;
+
 public class ReadmeActivity extends AppCompatActivity {
 
-    TextView tvReadme, tvError;
+    TextView tvError;
     ProgressBar progressBar;
     ScrollView scrollView;
+    MarkdownView mdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +33,7 @@ public class ReadmeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_readme);
 
         progressBar = findViewById(R.id.pb_ReadmeProgressbar);
-        tvReadme = findViewById(R.id.tv_readme);
+        mdView = findViewById(R.id.mdv_readme);
         tvError = findViewById(R.id.tv_ReadmeError);
         scrollView = findViewById(R.id.sv_readmeScrollView);
 
@@ -83,7 +86,7 @@ public class ReadmeActivity extends AppCompatActivity {
             }
 
             showResult();
-            tvReadme.setText(s);
+            mdView.loadMarkdown(s);
         }
     }
 

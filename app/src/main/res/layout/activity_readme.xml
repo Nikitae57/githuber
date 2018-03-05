@@ -29,12 +29,11 @@
         android:layout_height="match_parent"
         android:visibility="invisible">
 
-        <TextView
-            android:id="@+id/tv_readme"
+        <us.feras.mdv.MarkdownView
+            android:id="@+id/mdv_readme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:textSize="16sp" />
+            android:padding="5dp" />
 
     </ScrollView>
 </FrameLayout>
