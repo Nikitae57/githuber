@@ -20,10 +20,6 @@ import org.json.JSONObject;
 
 import java.net.URL;
 
-/**
- * Created by nikit on 01.02.2018.
- */
-
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     private int mItemNumber;
@@ -87,8 +83,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(Uri.parse(urlStr));
 
-                        if (intent.resolveActivity(MainActivity.context.getPackageManager()) != null) {
-                            MainActivity.context.startActivity(intent);
+                        if (intent.resolveActivity(context.getPackageManager()) != null) {
+                            context.startActivity(intent);
                         }
 
                     } catch (JSONException ex) {
