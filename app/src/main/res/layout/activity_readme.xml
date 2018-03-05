@@ -32,8 +32,7 @@
         <us.feras.mdv.MarkdownView
             android:id="@+id/mdv_readme"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp" />
+            android:layout_height="wrap_content" />
 
     </ScrollView>
 </FrameLayout>
