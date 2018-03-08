@@ -15,4 +15,5 @@
     <string name="openRepo">Открыть репозиторий</string>
 
     <string name="readmeError">Возникла ошибка или у репозитория отсутствует Readme</string>
+    <string name="share">Share</string>
 </resources>

@@ -3,6 +3,7 @@ package com.example.nikit.githubapp;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -145,8 +146,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             int position = getAdapterPosition();
 
             String repoFullName = null;
+            String repoUrl = null;
             try {
                 repoFullName = ((JSONObject) itemsArray.get(position)).getString("full_name");
+                repoUrl = ((JSONObject) itemsArray.get(position)).getString("html_url");
             } catch (JSONException ex) {
                 ex.printStackTrace();
             }
@@ -154,7 +157,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             URL readmeUrl = NetworkUtil.makeRadmeUrl(repoFullName);
 
             Intent readmeIntent = new Intent(context, ReadmeActivity.class);
-            readmeIntent.putExtra(Intent.EXTRA_TEXT, readmeUrl.toString());
+            Bundle extras = new Bundle();
+            extras.putString("readmeUrl", readmeUrl.toString());
+            extras.putString("repoUrl", repoUrl);
+            readmeIntent.putExtras(extras);
             context.startActivity(readmeIntent);
         }
     }
