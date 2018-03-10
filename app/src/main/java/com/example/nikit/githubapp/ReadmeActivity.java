@@ -1,11 +1,10 @@
 package com.example.nikit.githubapp;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +27,8 @@ public class ReadmeActivity extends AppCompatActivity {
     ProgressBar progressBar;
     ScrollView scrollView;
     com.mukesh.MarkdownView mdView;
+
+    int idShare, idOpenRepo;
 
     private String repoUrl;
 
@@ -52,6 +53,8 @@ public class ReadmeActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
 
+        idShare = R.id.readme_menu_item_share;
+        idOpenRepo = R.id.readme_menu_item_open_repo;
 
         new QueryReadmeTask().execute(readmeUrl);
     }
@@ -59,14 +62,15 @@ public class ReadmeActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.readme_menu, menu);
-
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.readme_menu_item_share) {
+        int idClicked = item.getItemId();
+
+        if (idClicked == idShare) {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
             shareIntent.putExtra(Intent.EXTRA_TEXT, repoUrl);
@@ -76,6 +80,15 @@ public class ReadmeActivity extends AppCompatActivity {
             }
 
             return true;
+
+        } else if (idClicked == idOpenRepo) {
+
+            Intent openInBrowserIntent = new Intent(Intent.ACTION_VIEW);
+            openInBrowserIntent.setData(Uri.parse(repoUrl));
+
+            if (openInBrowserIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(openInBrowserIntent);
+            }
         }
 
         return super.onOptionsItemSelected(item);
