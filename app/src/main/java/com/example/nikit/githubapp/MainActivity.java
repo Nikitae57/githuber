@@ -2,10 +2,15 @@ package com.example.nikit.githubapp;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,7 +18,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -34,11 +38,14 @@ public class MainActivity extends AppCompatActivity {
 
     public static Context context;
 
-    RecyclerView recyclerView;
-    EditText searchField;
-    ProgressBar progressBar;
-    TextView tvError;
-    Spinner spinnerSortBy;
+    private RecyclerView recyclerView;
+    private EditText searchField, etSortBylanguage;
+    private ProgressBar progressBar;
+    private TextView tvError;
+    private Spinner spinnerSortBy;
+    private DrawerLayout drawer;
+    private NavigationView navView;
+    private View headerView;
 
     JSONArray itemsArray;
 
@@ -49,11 +56,31 @@ public class MainActivity extends AppCompatActivity {
 
         context = getApplicationContext();
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         searchField = findViewById(R.id.etQuery);
         progressBar = findViewById(R.id.progressBar);
         recyclerView = findViewById(R.id.rvListItems);
         tvError = findViewById(R.id.tvError);
-        spinnerSortBy = findViewById(R.id.sortBy);
+
+        drawer = findViewById(R.id.drawer_layout);
+        navView = findViewById(R.id.nv_main);
+        headerView = navView.getHeaderView(0);
+        etSortBylanguage = headerView.findViewById(R.id.et_sort_by_language);
+        spinnerSortBy = headerView.findViewById(R.id.sortBy);
+
+        etSortBylanguage.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    drawer.closeDrawers();
+                    makeSearchQuery(new View(context));
+                    return true;
+                }
+                return false;
+            }
+        });
 
         searchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -83,7 +110,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_open_sort_drawer:
+                drawer.openDrawer(GravityCompat.END);
+                return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
