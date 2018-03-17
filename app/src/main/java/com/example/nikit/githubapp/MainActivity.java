@@ -2,6 +2,7 @@ package com.example.nikit.githubapp;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -42,10 +43,11 @@ public class MainActivity extends AppCompatActivity {
     private EditText searchField, etSortBylanguage;
     private ProgressBar progressBar;
     private TextView tvError;
-    private Spinner spinnerSortBy;
     private DrawerLayout drawer;
     private NavigationView navView;
     private View headerView;
+
+    private NetworkUtil.SORT_BY sortBy;
 
     JSONArray itemsArray;
 
@@ -53,8 +55,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         context = getApplicationContext();
+
+        sortBy = NetworkUtil.SORT_BY.BEST_MATCH;
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -65,17 +68,77 @@ public class MainActivity extends AppCompatActivity {
         tvError = findViewById(R.id.tvError);
 
         drawer = findViewById(R.id.drawer_layout);
+        drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+                if (slideOffset != 0) {
+                    hideKeyboard();
+                }
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+
         navView = findViewById(R.id.nv_main);
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.isChecked()) {
+                    return true;
+                }
+
+                item.setCheckable(true);
+                drawer.closeDrawers();
+
+                switch (item.getItemId()) {
+                    case R.id.action_sort_by_stars:
+                        sortBy = NetworkUtil.SORT_BY.MOST_STARS;
+                    break;
+
+                    case R.id.action_sort_by_forks:
+                        sortBy = NetworkUtil.SORT_BY.MOST_FORKS;
+                    break;
+
+                    case R.id.action_sort_by_updates:
+                        sortBy = NetworkUtil.SORT_BY.RECENTLY_UPDATED;
+                    break;
+                }
+
+                makeSearchQuery(new View(context));
+
+                return true;
+            }
+        });
+
         headerView = navView.getHeaderView(0);
         etSortBylanguage = headerView.findViewById(R.id.et_sort_by_language);
-        spinnerSortBy = headerView.findViewById(R.id.sortBy);
 
         etSortBylanguage.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     drawer.closeDrawers();
-                    makeSearchQuery(new View(context));
+
+                    String etText = etSortBylanguage.getText().toString();
+                    if (etText.equals("")) {
+                        makeSearchQuery(new View(context));
+                    } else {
+
+                    }
                     return true;
                 }
                 return false;
@@ -90,18 +153,6 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
                 return false;
-            }
-        });
-
-        spinnerSortBy.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                makeSearchQuery(null);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
 
@@ -155,28 +206,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        String sortBy = spinnerSortBy.getSelectedItem().toString();
-
-        NetworkUtil.SORT_BY sort_by = null;
-        switch (sortBy) {
-            case "лучшее совпадение":
-                sort_by = NetworkUtil.SORT_BY.BEST_MATCH;
-            break;
-
-            case "больше звёзд":
-                sort_by = NetworkUtil.SORT_BY.MOST_STARS;
-            break;
-
-            case "больше ответвлений":
-                sort_by = NetworkUtil.SORT_BY.MOST_FORKS;
-            break;
-
-            case "обновлялись недавно":
-                sort_by = NetworkUtil.SORT_BY.RECENTLY_UPDATED;
-            break;
-        }
-
-        URL url = NetworkUtil.makeURL(repoToSearch, sort_by);
+        URL url = NetworkUtil.makeURL(repoToSearch, sortBy);
 
         QueryTask queryTask = new QueryTask();
         queryTask.execute(url);

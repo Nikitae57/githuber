@@ -154,7 +154,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 ex.printStackTrace();
             }
 
-            URL readmeUrl = NetworkUtil.makeRadmeUrl(repoFullName);
+            URL readmeUrl = NetworkUtil.makeReadmeUrl(repoFullName);
 
             Intent readmeIntent = new Intent(context, ReadmeActivity.class);
             Bundle extras = new Bundle();

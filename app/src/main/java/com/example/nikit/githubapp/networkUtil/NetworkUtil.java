@@ -10,10 +10,6 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Scanner;
 
-/**
- * Created by nikit on 01.02.2018.
- */
-
 public class NetworkUtil {
 
     final static String GITHUB_BASE_URL = "https://api.github.com/search/repositories";
@@ -56,6 +52,22 @@ public class NetworkUtil {
         return url;
     }
 
+    public static URL makeURL(String query) {
+        Uri uri;
+
+        uri = Uri.parse(GITHUB_BASE_URL).buildUpon().
+                appendQueryParameter(PARAM_QUERY, query).build();
+
+        URL url = null;
+        try {
+            url = new URL(uri.toString());
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+
+        return url;
+    }
+
     public static String makeHTTPRequest(URL url) throws IOException {
         HttpURLConnection httpConnection = (HttpURLConnection) url.openConnection();
         httpConnection.setConnectTimeout(5000);
@@ -78,7 +90,7 @@ public class NetworkUtil {
         return result;
     }
 
-    public static URL makeRadmeUrl(String fullName) {
+    public static URL makeReadmeUrl(String fullName) {
 
         if (fullName == null || fullName.equals("")) {
             throw new NullPointerException();

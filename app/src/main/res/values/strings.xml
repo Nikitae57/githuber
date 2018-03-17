@@ -24,4 +24,8 @@
 
     <string name="action_settings">Settings</string>
     <string name="sort">Sort</string>
+    <string name="starts">Звёзды</string>
+    <string name="forks">Ответвления</string>
+    <string name="updates">Обновления</string>
+    <string name="bestMatch">Лучшее совпадение</string>
 </resources>
