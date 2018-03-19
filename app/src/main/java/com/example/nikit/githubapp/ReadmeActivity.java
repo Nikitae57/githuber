@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +37,9 @@ public class ReadmeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_readme);
+
+        Toolbar toolbar = findViewById(R.id.toolbar_readme);
+        setSupportActionBar(toolbar);
 
         progressBar = findViewById(R.id.pb_ReadmeProgressbar);
         mdView = findViewById(R.id.mdv_readme);

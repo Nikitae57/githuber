@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private View headerView;
 
     private NetworkUtil.SORT_BY sortBy;
+    private String languageSort;
 
     JSONArray itemsArray;
 
@@ -105,6 +106,10 @@ public class MainActivity extends AppCompatActivity {
                 drawer.closeDrawers();
 
                 switch (item.getItemId()) {
+                    case R.id.action_sort_by_best_match:
+                        sortBy = NetworkUtil.SORT_BY.BEST_MATCH;
+                    break;
+
                     case R.id.action_sort_by_stars:
                         sortBy = NetworkUtil.SORT_BY.MOST_STARS;
                     break;
@@ -131,14 +136,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+
                     drawer.closeDrawers();
-
-                    String etText = etSortBylanguage.getText().toString();
-                    if (etText.equals("")) {
-                        makeSearchQuery(new View(context));
-                    } else {
-
-                    }
+                    makeSearchQuery(new View(context));
                     return true;
                 }
                 return false;
@@ -206,7 +206,15 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        URL url = NetworkUtil.makeURL(repoToSearch, sortBy);
+        URL url = null;
+        String languageSort = etSortBylanguage.getText().toString();
+        if (languageSort.equals("") || languageSort == null) {
+            url = NetworkUtil.makeURL(repoToSearch, sortBy);
+            System.out.println(url.toString());
+        } else {
+            url = NetworkUtil.makeURL(repoToSearch, sortBy, languageSort);
+            System.out.println(url.toString());
+        }
 
         QueryTask queryTask = new QueryTask();
         queryTask.execute(url);

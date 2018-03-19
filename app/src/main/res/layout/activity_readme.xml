@@ -1,39 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.example.nikit.githubapp.ReadmeActivity">
 
-    <ProgressBar
-        android:id="@+id/pb_ReadmeProgressbar"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_readme"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="invisible" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="#212121"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:titleTextColor="@android:color/white" />
 
-    <TextView
-        android:id="@+id/tv_ReadmeError"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="@string/readmeError"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:visibility="invisible" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:id="@+id/sv_readmeScrollView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible">
-
-        <com.mukesh.MarkdownView
-            android:id="@+id/mdv_readme"
+        <ProgressBar
+            android:id="@+id/pb_ReadmeProgressbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="10dp" />
+            android:layout_gravity="center"
+            android:visibility="invisible" />
 
-    </ScrollView>
-</FrameLayout>
+        <TextView
+            android:id="@+id/tv_ReadmeError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="@string/readmeError"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:visibility="invisible" />
+
+        <ScrollView
+            android:id="@+id/sv_readmeScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible">
+
+            <com.mukesh.MarkdownView
+                android:id="@+id/mdv_readme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp" />
+
+        </ScrollView>
+    </FrameLayout>
+
+</LinearLayout>
