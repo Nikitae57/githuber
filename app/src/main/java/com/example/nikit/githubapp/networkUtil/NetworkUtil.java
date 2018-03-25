@@ -1,14 +1,30 @@
 package com.example.nikit.githubapp.networkUtil;
 
 import android.net.Uri;
+import android.util.Base64;
+import android.util.Log;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class NetworkUtil {
 
@@ -86,6 +102,26 @@ public class NetworkUtil {
         }
 
         return url;
+    }
+
+    public static void makeAuthRequest(URL url) throws IOException {
+
+        HttpsURLConnection uc = (HttpsURLConnection) url.openConnection();
+        uc.setRequestProperty("X-Requested-With", "Curl");
+
+        String userpass = "nikitae57" + ":" + "ybrbnf1999";
+        String basicAuth = "Basic " + String.valueOf(Base64.encode(userpass.getBytes(), Base64.DEFAULT));
+        uc.setRequestProperty("Authorization", basicAuth);
+
+        InputStreamReader inputStreamReader = new InputStreamReader(uc.getInputStream());
+        Scanner sc = new Scanner(inputStreamReader);
+        sc.useDelimiter("\\A");
+
+        if (sc.hasNext()) {
+            String str = sc.next();
+            Log.d("TAG", str);
+        }
+        uc.disconnect();
     }
 
     public static String makeHTTPRequest(URL url) throws IOException {

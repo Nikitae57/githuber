@@ -206,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+
         URL url = null;
         String languageSort = etSortBylanguage.getText().toString();
         if (languageSort.equals("") || languageSort == null) {
@@ -256,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
             String result = null;
             try {
                 result = NetworkUtil.makeHTTPRequest(urls[0]);
+                NetworkUtil.makeAuthRequest(new URL("https://api.github.com/user"));
             } catch (IOException ioex) {
                 ioex.printStackTrace();
             }
