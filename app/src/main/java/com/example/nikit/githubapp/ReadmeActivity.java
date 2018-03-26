@@ -38,6 +38,8 @@ public class ReadmeActivity extends AppCompatActivity {
 
     private String repoUrl;
     private String repoFullName;
+    private URL starRepoUrl;
+    private boolean repoIsChecked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,7 @@ public class ReadmeActivity extends AppCompatActivity {
         tvError = findViewById(R.id.tv_ReadmeError);
         scrollView = findViewById(R.id.sv_readmeScrollView);
 
+        repoIsChecked = false;
         URL readmeUrl = null;
         Intent receivedIntent = getIntent();
 
@@ -62,9 +65,12 @@ public class ReadmeActivity extends AppCompatActivity {
             repoUrl = extras.getString("repoUrl");
             readmeUrl = new URL(extras.getString("readmeUrl"));
             repoFullName = extras.getString("repoFullName");
+            starRepoUrl = NetworkUtil.makeStarRepoURL(repoFullName);
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
         }
+
+        new CheckStarRepoTask().execute(starRepoUrl);
 
         idShare = R.id.readme_menu_item_share;
         idOpenRepo = R.id.readme_menu_item_open_repo;
@@ -106,8 +112,11 @@ public class ReadmeActivity extends AppCompatActivity {
             return true;
 
         } else if (idClicked == idStarRepo) {
-            URL starRepoUrl = NetworkUtil.makeStarRepoURL(repoFullName);
-            new StarRepoTask().execute(starRepoUrl);
+            if (!repoIsChecked) {
+                new StarRepoTask().execute(starRepoUrl);
+            } else {
+                new UnstarRepoTask().execute(starRepoUrl);
+            }
             return true;
         }
 
@@ -153,6 +162,65 @@ public class ReadmeActivity extends AppCompatActivity {
         }
     }
 
+    class CheckStarRepoTask extends AsyncTask<URL, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(URL... urls) {
+
+            try {
+                int respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
+                        MainActivity.login, MainActivity.password, REQUEST_METHOD.GET);
+
+                if (respondCode == 204) { return true; }
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean bool) {
+            if (bool) {
+                menu.getItem(0).setIcon(ContextCompat.
+                        getDrawable(context, R.drawable.ic_star_white));
+                repoIsChecked = true;
+            }
+        }
+    }
+
+    class UnstarRepoTask extends AsyncTask<URL, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(URL... urls) {
+
+            try {
+                NetworkUtil.makeAuthRequest(urls[0], MainActivity.login,
+                        MainActivity.password, REQUEST_METHOD.DELETE);
+
+                int respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
+                        MainActivity.login, MainActivity.password, REQUEST_METHOD.GET);
+
+                if (respondCode == 204) { return true; }
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean bool) {
+            if (!bool) {
+                menu.getItem(0).setIcon(ContextCompat.
+                        getDrawable(context, R.drawable.ic_unstar));
+                repoIsChecked = false;
+            }
+        }
+    }
+
     class StarRepoTask extends AsyncTask<URL, Void, Boolean> {
 
         @Override
@@ -177,8 +245,9 @@ public class ReadmeActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean bool) {
             if (bool) {
-                menu.getItem(2).setIcon(ContextCompat.
-                        getDrawable(context, R.drawable.ic_star));
+                menu.getItem(0).setIcon(ContextCompat.
+                        getDrawable(context, R.drawable.ic_star_white));
+                repoIsChecked = true;
             }
         }
     }

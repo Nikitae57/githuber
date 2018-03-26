@@ -178,40 +178,50 @@ public class NetworkUtil {
     public static int makeAuthRespondCodeRequest(URL url, String login,
             String password, REQUEST_METHOD request_method) throws IOException {
 
+        int respondCode = 404;
         HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
-        httpsURLConnection.setRequestProperty("X-Requested-With", "Curl");
+        try {
+            httpsURLConnection.setRequestProperty("X-Requested-With", "Curl");
 
-        switch (request_method) {
-            case GET:
-                httpsURLConnection.setRequestMethod("GET");
-                break;
+            switch (request_method) {
+                case GET:
+                    httpsURLConnection.setRequestMethod("GET");
+                    break;
 
-            case POST:
-                httpsURLConnection.setRequestMethod("POST");
-                break;
+                case POST:
+                    httpsURLConnection.setRequestMethod("POST");
+                    break;
 
-            case PATCH:
-                httpsURLConnection.setRequestMethod("PATCH");
-                break;
+                case PATCH:
+                    httpsURLConnection.setRequestMethod("PATCH");
+                    break;
 
-            case PUT:
-                httpsURLConnection.setRequestMethod("PUT");
-                break;
+                case PUT:
+                    httpsURLConnection.setRequestMethod("PUT");
+                    break;
 
-            case DELETE:
-                httpsURLConnection.setRequestMethod("DELETE");
-                break;
+                case DELETE:
+                    httpsURLConnection.setRequestMethod("DELETE");
+                    break;
 
-            default: break;
+                default: break;
+            }
+
+            String userpass = login + ":" + password;
+            String basicAuth = "Basic " + Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP);
+            httpsURLConnection.setRequestProperty("Authorization", basicAuth);
+
+            respondCode = httpsURLConnection.getResponseCode();
+
+        } catch (IOException ex) {
+            Log.d("STACK", ex.toString());
+        } finally {
+            if (httpsURLConnection != null) {
+                httpsURLConnection.disconnect();
+            }
         }
 
-        String userpass = login + ":" + password;
-        String basicAuth = "Basic " + Arrays.toString(Base64.encode(userpass.getBytes(), Base64.DEFAULT));
-        httpsURLConnection.setRequestProperty("Authorization", basicAuth);
-
-        httpsURLConnection.connect();
-
-        return httpsURLConnection.getResponseCode();
+        return respondCode;
     }
 
     public static String makeHTTPRequest(URL url) throws IOException {
