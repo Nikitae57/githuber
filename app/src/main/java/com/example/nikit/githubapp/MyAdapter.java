@@ -160,6 +160,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             Bundle extras = new Bundle();
             extras.putString("readmeUrl", readmeUrl.toString());
             extras.putString("repoUrl", repoUrl);
+            extras.putString("repoFullName", repoFullName);
             readmeIntent.putExtras(extras);
             context.startActivity(readmeIntent);
         }

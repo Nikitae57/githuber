@@ -1,8 +1,10 @@
 package com.example.nikit.githubapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
 import org.json.JSONException;
@@ -28,15 +31,20 @@ public class ReadmeActivity extends AppCompatActivity {
     ProgressBar progressBar;
     ScrollView scrollView;
     com.mukesh.MarkdownView mdView;
+    Menu menu;
+    int idShare, idOpenRepo, idStarRepo;
 
-    int idShare, idOpenRepo;
+    private Context context;
 
     private String repoUrl;
+    private String repoFullName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_readme);
+
+        context = this;
 
         Toolbar toolbar = findViewById(R.id.toolbar_readme);
         setSupportActionBar(toolbar);
@@ -53,12 +61,14 @@ public class ReadmeActivity extends AppCompatActivity {
             Bundle extras = receivedIntent.getExtras();
             repoUrl = extras.getString("repoUrl");
             readmeUrl = new URL(extras.getString("readmeUrl"));
+            repoFullName = extras.getString("repoFullName");
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
         }
 
         idShare = R.id.readme_menu_item_share;
         idOpenRepo = R.id.readme_menu_item_open_repo;
+        idStarRepo = R.id.readme_menu_item_star_repo;
 
         new QueryReadmeTask().execute(readmeUrl);
     }
@@ -66,6 +76,7 @@ public class ReadmeActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.readme_menu, menu);
+        this.menu = menu;
         return true;
     }
 
@@ -82,7 +93,6 @@ public class ReadmeActivity extends AppCompatActivity {
             if (shareIntent.resolveActivity(getPackageManager()) != null) {
                 startActivity(shareIntent);
             }
-
             return true;
 
         } else if (idClicked == idOpenRepo) {
@@ -93,6 +103,12 @@ public class ReadmeActivity extends AppCompatActivity {
             if (openInBrowserIntent.resolveActivity(getPackageManager()) != null) {
                 startActivity(openInBrowserIntent);
             }
+            return true;
+
+        } else if (idClicked == idStarRepo) {
+            URL starRepoUrl = NetworkUtil.makeStarRepoURL(repoFullName);
+            new StarRepoTask().execute(starRepoUrl);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -136,6 +152,37 @@ public class ReadmeActivity extends AppCompatActivity {
             mdView.setMarkDownText(s);
         }
     }
+
+    class StarRepoTask extends AsyncTask<URL, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(URL... urls) {
+
+            try {
+                NetworkUtil.makeAuthRequest(urls[0], MainActivity.login,
+                        MainActivity.password, REQUEST_METHOD.PUT);
+
+                int respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
+                        MainActivity.login, MainActivity.password, REQUEST_METHOD.GET);
+
+                if (respondCode == 204) { return true; }
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean bool) {
+            if (bool) {
+                menu.getItem(2).setIcon(ContextCompat.
+                        getDrawable(context, R.drawable.ic_star));
+            }
+        }
+    }
+
 
     private void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);

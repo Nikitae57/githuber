@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,12 +17,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
 import org.json.JSONArray;
@@ -38,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private int NUMBER_OF_ITEMS;
 
     public static Context context;
+    public static String login = "nikitae57";
+    public static String password = "ybrbnf1999";
 
     private RecyclerView recyclerView;
     private EditText searchField, etSortBylanguage;
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
     private View headerView;
 
     private NetworkUtil.SORT_BY sortBy;
-    private String languageSort;
 
     JSONArray itemsArray;
 
@@ -210,10 +209,10 @@ public class MainActivity extends AppCompatActivity {
         URL url = null;
         String languageSort = etSortBylanguage.getText().toString();
         if (languageSort.equals("") || languageSort == null) {
-            url = NetworkUtil.makeURL(repoToSearch, sortBy);
+            url = NetworkUtil.makeSearchURL(repoToSearch, sortBy);
             System.out.println(url.toString());
         } else {
-            url = NetworkUtil.makeURL(repoToSearch, sortBy, languageSort);
+            url = NetworkUtil.makeSearchURL(repoToSearch, sortBy, languageSort);
             System.out.println(url.toString());
         }
 
@@ -257,7 +256,6 @@ public class MainActivity extends AppCompatActivity {
             String result = null;
             try {
                 result = NetworkUtil.makeHTTPRequest(urls[0]);
-                NetworkUtil.makeAuthRequest(new URL("https://api.github.com/user"));
             } catch (IOException ioex) {
                 ioex.printStackTrace();
             }

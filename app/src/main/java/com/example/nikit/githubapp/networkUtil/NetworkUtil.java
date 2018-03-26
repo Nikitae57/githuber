@@ -4,31 +4,27 @@ import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
+import com.example.nikit.githubapp.enums.REQUEST_METHOD;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.PasswordAuthentication;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class NetworkUtil {
 
-    final static String GITHUB_BASE_URL = "https://api.github.com/search/repositories";
+    final static String GITHUB_API_BASE_URL = "https://api.github.com";
+    final static String GITHUB_SEARCH_URL = "https://api.github.com/search/repositories";
     final static String PARAM_QUERY = "q";
     final static String PARAM_SORT = "sort";
     final static String PARAM_LANG = "language";
@@ -36,11 +32,11 @@ public class NetworkUtil {
 
     final static String README_BASE_URL = "https://api.github.com/repos";
 
-    public static URL makeURL(String query, SORT_BY sort_by) {
+    public static URL makeSearchURL(String query, SORT_BY sort_by) {
 
         Uri uri;
         if (sort_by == SORT_BY.BEST_MATCH) {
-            uri = Uri.parse(GITHUB_BASE_URL).buildUpon().
+            uri = Uri.parse(GITHUB_SEARCH_URL).buildUpon().
                     appendQueryParameter(PARAM_QUERY, query).build();
         } else {
             switch (sort_by) {
@@ -54,7 +50,7 @@ public class NetworkUtil {
                 break;
             }
 
-            uri = Uri.parse(GITHUB_BASE_URL).buildUpon().
+            uri = Uri.parse(GITHUB_SEARCH_URL).buildUpon().
                     appendQueryParameter(PARAM_QUERY, query).
                     appendQueryParameter(PARAM_SORT, sortBy).build();
         }
@@ -69,10 +65,10 @@ public class NetworkUtil {
         return url;
     }
 
-    public static URL makeURL(String query, SORT_BY sort_by, String language) {
+    public static URL makeSearchURL(String query, SORT_BY sort_by, String language) {
         Uri uri;
         if (sort_by == SORT_BY.BEST_MATCH) {
-            uri = Uri.parse(GITHUB_BASE_URL).buildUpon().
+            uri = Uri.parse(GITHUB_SEARCH_URL).buildUpon().
                     appendQueryParameter(PARAM_QUERY, query +
                     "+" + PARAM_LANG + ":" + language).build();
         } else {
@@ -87,7 +83,7 @@ public class NetworkUtil {
                     break;
             }
 
-            uri = Uri.parse(GITHUB_BASE_URL).buildUpon().
+            uri = Uri.parse(GITHUB_SEARCH_URL).buildUpon().
                     appendQueryParameter(PARAM_QUERY, query +
                     "+" + PARAM_LANG + ":" + language).
                     appendQueryParameter(PARAM_SORT, sortBy).
@@ -104,24 +100,118 @@ public class NetworkUtil {
         return url;
     }
 
-    public static void makeAuthRequest(URL url) throws IOException {
+    public static URL makeStarRepoURL(String repoFullName) {
 
-        HttpsURLConnection uc = (HttpsURLConnection) url.openConnection();
-        uc.setRequestProperty("X-Requested-With", "Curl");
-
-        String userpass = "nikitae57" + ":" + "ybrbnf1999";
-        String basicAuth = "Basic " + String.valueOf(Base64.encode(userpass.getBytes(), Base64.DEFAULT));
-        uc.setRequestProperty("Authorization", basicAuth);
-
-        InputStreamReader inputStreamReader = new InputStreamReader(uc.getInputStream());
-        Scanner sc = new Scanner(inputStreamReader);
-        sc.useDelimiter("\\A");
-
-        if (sc.hasNext()) {
-            String str = sc.next();
-            Log.d("TAG", str);
+        URL url = null;
+        try {
+            url = new URL(GITHUB_API_BASE_URL + "/user/starred/" + repoFullName);
+            String u = url.toString();
+            Log.d("url", u);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
-        uc.disconnect();
+
+        return url;
+    }
+
+    public static JSONObject makeAuthRequest(URL url, String login,
+            String password, REQUEST_METHOD request_method) throws IOException {
+
+        String ur = url.toString();
+        Log.d("URL", ur);
+
+        JSONObject jsonRespond = null;
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
+        try {
+            httpsURLConnection.setRequestProperty("X-Requested-With", "Curl");
+
+            switch (request_method) {
+                case GET:
+                    httpsURLConnection.setRequestMethod("GET");
+                break;
+
+                case POST:
+                    httpsURLConnection.setRequestMethod("POST");
+                break;
+
+                case PATCH:
+                    httpsURLConnection.setRequestMethod("PATCH");
+                break;
+
+                case PUT:
+                    httpsURLConnection.setRequestMethod("PUT");
+                    break;
+
+                case DELETE:
+                    httpsURLConnection.setRequestMethod("DELETE");
+                    break;
+
+                default: break;
+            }
+
+            String userpass = login + ":" + password;
+            String basicAuth = "Basic " + Base64.encodeToString(userpass.getBytes(), Base64.NO_WRAP);
+            httpsURLConnection.setRequestProperty("Authorization", basicAuth);
+
+            int respondCode = httpsURLConnection.getResponseCode();
+            Log.d("CODE", String.valueOf(respondCode));
+
+            InputStreamReader inputStreamReader = new InputStreamReader(httpsURLConnection.getInputStream());
+            Scanner sc = new Scanner(inputStreamReader);
+            sc.useDelimiter("\\A");
+
+            if (sc.hasNext()) {
+                jsonRespond = new JSONObject(sc.next());
+            }
+
+        } catch (JSONException | IOException ex) {
+            Log.d("STACK", ex.toString());
+        } finally {
+            if (httpsURLConnection != null) {
+                httpsURLConnection.disconnect();
+            }
+        }
+
+        return jsonRespond;
+    }
+
+    public static int makeAuthRespondCodeRequest(URL url, String login,
+            String password, REQUEST_METHOD request_method) throws IOException {
+
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
+        httpsURLConnection.setRequestProperty("X-Requested-With", "Curl");
+
+        switch (request_method) {
+            case GET:
+                httpsURLConnection.setRequestMethod("GET");
+                break;
+
+            case POST:
+                httpsURLConnection.setRequestMethod("POST");
+                break;
+
+            case PATCH:
+                httpsURLConnection.setRequestMethod("PATCH");
+                break;
+
+            case PUT:
+                httpsURLConnection.setRequestMethod("PUT");
+                break;
+
+            case DELETE:
+                httpsURLConnection.setRequestMethod("DELETE");
+                break;
+
+            default: break;
+        }
+
+        String userpass = login + ":" + password;
+        String basicAuth = "Basic " + Arrays.toString(Base64.encode(userpass.getBytes(), Base64.DEFAULT));
+        httpsURLConnection.setRequestProperty("Authorization", basicAuth);
+
+        httpsURLConnection.connect();
+
+        return httpsURLConnection.getResponseCode();
     }
 
     public static String makeHTTPRequest(URL url) throws IOException {

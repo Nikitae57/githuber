@@ -14,4 +14,12 @@
         android:orderInCategory="1"
         android:title="@string/openRepo"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/readme_menu_item_star_repo"
+
+        android:icon="@drawable/ic_unstar"
+        android:title="@string/starRepo"
+
+        app:showAsAction="ifRoom" />
 </menu>
