@@ -1,4 +1,4 @@
-package com.example.nikit.githubapp;
+package com.example.nikit.githubapp.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +15,8 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.example.nikit.githubapp.R;
+import com.example.nikit.githubapp.activities.MainActivity;
 import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 

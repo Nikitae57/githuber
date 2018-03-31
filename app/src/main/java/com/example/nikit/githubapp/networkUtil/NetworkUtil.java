@@ -32,6 +32,18 @@ public class NetworkUtil {
 
     final static String README_BASE_URL = "https://api.github.com/repos";
 
+    public static URL makeUserUrl() {
+
+        URL url = null;
+        try {
+            url =  new URL(GITHUB_API_BASE_URL + "/user");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
     public static URL makeSearchURL(String query, SORT_BY sort_by) {
 
         Uri uri;

@@ -1,4 +1,4 @@
-package com.example.nikit.githubapp;
+package com.example.nikit.githubapp.activities.layout;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.nikit.githubapp.R;
+import com.example.nikit.githubapp.activities.ReadmeActivity;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
 import org.json.JSONArray;

@@ -1,6 +1,7 @@
-package com.example.nikit.githubapp;
+package com.example.nikit.githubapp.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -21,7 +22,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.nikit.githubapp.enums.REQUEST_METHOD;
+import com.example.nikit.githubapp.activities.layout.MyAdapter;
+import com.example.nikit.githubapp.R;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
 import org.json.JSONArray;
@@ -36,16 +38,18 @@ public class MainActivity extends AppCompatActivity {
     private int NUMBER_OF_ITEMS;
 
     public static Context context;
-    public static String login = "nikitae57";
-    public static String password = "ybrbnf1999";
+    public static String login;
+    public static String password;
+
+    public static boolean userIsLoggedIn;
 
     private RecyclerView recyclerView;
     private EditText searchField, etSortBylanguage;
     private ProgressBar progressBar;
     private TextView tvError;
     private DrawerLayout drawer;
-    private NavigationView navView;
-    private View headerView;
+    private NavigationView navView, loginNavView;
+    private View headerView, loginHeaderView;
 
     private NetworkUtil.SORT_BY sortBy;
 
@@ -58,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         context = getApplicationContext();
 
         sortBy = NetworkUtil.SORT_BY.BEST_MATCH;
+        userIsLoggedIn = false;
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -89,6 +94,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDrawerStateChanged(int newState) {
 
+            }
+        });
+
+        loginNavView = findViewById(R.id.nv_main_login);
+        loginNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                drawer.closeDrawers();
+
+                switch (item.getItemId()) {
+                    case R.id.action_log_in:
+                        Intent loginIntent = new Intent(context, LoginActivity.class);
+                        startActivityForResult(loginIntent, 1);
+                        return true;
+                }
+
+                return false;
             }
         });
 
@@ -210,10 +232,8 @@ public class MainActivity extends AppCompatActivity {
         String languageSort = etSortBylanguage.getText().toString();
         if (languageSort.equals("") || languageSort == null) {
             url = NetworkUtil.makeSearchURL(repoToSearch, sortBy);
-            System.out.println(url.toString());
         } else {
             url = NetworkUtil.makeSearchURL(repoToSearch, sortBy, languageSort);
-            System.out.println(url.toString());
         }
 
         QueryTask queryTask = new QueryTask();

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.nikit.githubapp.ReadmeActivity">
+    tools:context="com.example.nikit.githubapp.activities.ReadmeActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_readme"

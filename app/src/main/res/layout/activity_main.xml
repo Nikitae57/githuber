@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#fbfbfb"
     android:fitsSystemWindows="true"
-    tools:context="com.example.nikit.githubapp.MainActivity">
+    tools:context="com.example.nikit.githubapp.activities.MainActivity">
 
 
     <LinearLayout
@@ -102,5 +102,14 @@
         android:fitsSystemWindows="false"
         app:menu="@menu/sort_drawer_menu"
         app:headerLayout="@layout/header" />
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nv_main_login"
+        android:layout_width="250dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="false"
+        app:menu="@menu/main_activity_logged_out"
+        app:headerLayout="@layout/nav_header_login" />
 
 </android.support.v4.widget.DrawerLayout>
