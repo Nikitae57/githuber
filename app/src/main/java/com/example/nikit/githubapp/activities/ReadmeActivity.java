@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -14,6 +17,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.nikit.githubapp.R;
 import com.example.nikit.githubapp.activities.MainActivity;
@@ -29,19 +33,21 @@ import java.net.URL;
 
 public class ReadmeActivity extends AppCompatActivity {
 
-    TextView tvError;
-    ProgressBar progressBar;
-    ScrollView scrollView;
-    com.mukesh.MarkdownView mdView;
-    Menu menu;
-    int idShare, idOpenRepo, idStarRepo;
+    private TextView tvError;
+    private ProgressBar progressBar;
+    private ScrollView scrollView;
+    private com.mukesh.MarkdownView mdView;
+    private Menu menu;
+    private DrawerLayout drawer;
 
+    private int idShare, idOpenRepo, idStarRepo;
     private Context context;
 
     private String repoUrl;
     private String repoFullName;
     private URL starRepoUrl;
     private boolean repoIsChecked;
+    private int respondCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,11 @@ public class ReadmeActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar_readme);
         setSupportActionBar(toolbar);
 
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+
+        drawer = findViewById(R.id.readme_drawer);
         progressBar = findViewById(R.id.pb_ReadmeProgressbar);
         mdView = findViewById(R.id.mdv_readme);
         tvError = findViewById(R.id.tv_ReadmeError);
@@ -120,6 +131,10 @@ public class ReadmeActivity extends AppCompatActivity {
                 new UnstarRepoTask().execute(starRepoUrl);
             }
             return true;
+
+        } else if (idClicked == android.R.id.home) {
+            drawer.openDrawer(GravityCompat.START);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -170,7 +185,7 @@ public class ReadmeActivity extends AppCompatActivity {
         protected Boolean doInBackground(URL... urls) {
 
             try {
-                int respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
+                respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
                         MainActivity.login, MainActivity.password, REQUEST_METHOD.GET);
 
                 if (respondCode == 204) { return true; }
@@ -201,7 +216,7 @@ public class ReadmeActivity extends AppCompatActivity {
                 NetworkUtil.makeAuthRequest(urls[0], MainActivity.login,
                         MainActivity.password, REQUEST_METHOD.DELETE);
 
-                int respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
+                respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
                         MainActivity.login, MainActivity.password, REQUEST_METHOD.GET);
 
                 if (respondCode == 204) { return true; }
@@ -219,6 +234,13 @@ public class ReadmeActivity extends AppCompatActivity {
                 menu.getItem(0).setIcon(ContextCompat.
                         getDrawable(context, R.drawable.ic_unstar));
                 repoIsChecked = false;
+
+            } else {
+
+                Toast toast = new Toast(context);
+                toast.setDuration(Toast.LENGTH_SHORT);
+                toast.setText("Respond code: " + respondCode);
+                toast.show();
             }
         }
     }
@@ -232,7 +254,7 @@ public class ReadmeActivity extends AppCompatActivity {
                 NetworkUtil.makeAuthRequest(urls[0], MainActivity.login,
                         MainActivity.password, REQUEST_METHOD.PUT);
 
-                int respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
+                respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
                         MainActivity.login, MainActivity.password, REQUEST_METHOD.GET);
 
                 if (respondCode == 204) { return true; }
@@ -249,7 +271,14 @@ public class ReadmeActivity extends AppCompatActivity {
             if (bool) {
                 menu.getItem(0).setIcon(ContextCompat.
                         getDrawable(context, R.drawable.ic_star_white));
+
                 repoIsChecked = true;
+
+            } else {
+                Toast toast = new Toast(context);
+                toast.setDuration(Toast.LENGTH_SHORT);
+                toast.setText("Respond code: " + respondCode);
+                toast.show();
             }
         }
     }

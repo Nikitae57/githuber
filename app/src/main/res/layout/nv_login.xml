@@ -1,0 +1,12 @@
+<android.support.design.widget.NavigationView
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    android:id="@+id/nv_main_login"
+    android:layout_width="250dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:fitsSystemWindows="false"
+    app:menu="@menu/main_activity_logged_out"
+    app:headerLayout="@layout/nav_header_login" />
