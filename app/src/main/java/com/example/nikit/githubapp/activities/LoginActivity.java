@@ -1,6 +1,7 @@
 package com.example.nikit.githubapp.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -48,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         new AuthTask().execute(url);
     }
 
-    class AuthTask extends AsyncTask<URL, Void, Boolean> {
+    class AuthTask extends AsyncTask<URL, Void, String> {
 
         @Override
         protected void onPreExecute() {
@@ -56,35 +57,39 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Boolean doInBackground(URL... urls) {
+        protected String doInBackground(URL... urls) {
 
             int respondCode = 401;
+            String respond = null;
             try {
-                respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0], login, password, REQUEST_METHOD.GET);
+                respondCode = NetworkUtil.makeAuthRespondCodeRequest(urls[0],
+                        login, password, REQUEST_METHOD.GET);
+
+                respond = NetworkUtil.makeAuthRequest(urls[0],
+                        login, password, REQUEST_METHOD.GET);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
             if (respondCode != 401) {
-
-                MainActivity.userIsLoggedIn = true;
-                return true;
+                return respond;
             }
 
-            return false;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(Boolean bool) {
-            if (!bool) {
+        protected void onPostExecute(String respond) {
+            if (respond == null) {
                 tvWrong.setVisibility(View.VISIBLE);
                 return;
             }
 
-            MainActivity.login = login;
-            MainActivity.password = password;
-
-            setResult(Activity.RESULT_OK);
+            Intent intent = new Intent();
+            intent.putExtra("login", login);
+            intent.putExtra("password", password);
+            intent.putExtra("json", respond);
+            setResult(Activity.RESULT_OK, intent);
             finish();
 
         }

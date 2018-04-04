@@ -126,13 +126,13 @@ public class NetworkUtil {
         return url;
     }
 
-    public static JSONObject makeAuthRequest(URL url, String login,
+    public static String makeAuthRequest(URL url, String login,
             String password, REQUEST_METHOD request_method) throws IOException {
 
         String ur = url.toString();
         Log.d("URL", ur);
 
-        JSONObject jsonRespond = null;
+        String respond = null;
         HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
         try {
             httpsURLConnection.setRequestProperty("X-Requested-With", "Curl");
@@ -173,18 +173,16 @@ public class NetworkUtil {
             sc.useDelimiter("\\A");
 
             if (sc.hasNext()) {
-                jsonRespond = new JSONObject(sc.next());
+                respond = sc.next();
             }
 
-        } catch (JSONException | IOException ex) {
-            Log.d("STACK", ex.toString());
         } finally {
             if (httpsURLConnection != null) {
                 httpsURLConnection.disconnect();
             }
         }
 
-        return jsonRespond;
+        return respond;
     }
 
     public static int makeAuthRespondCodeRequest(URL url, String login,

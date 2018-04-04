@@ -50,4 +50,6 @@
     <string name="emailOrLogin">Email или логин</string>
     <string name="login">Войти</string>
     <string name="wrongLoginOrPassword">Неверный логин или пароль!</string>
+    <string name="starred">Избранное</string>
+    <string name="repos">Репозитории</string>
 </resources>

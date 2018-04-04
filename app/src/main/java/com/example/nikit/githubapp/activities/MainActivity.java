@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.nikit.githubapp.User;
 import com.example.nikit.githubapp.activities.layout.MyAdapter;
 import com.example.nikit.githubapp.R;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
@@ -39,18 +40,18 @@ public class MainActivity extends AppCompatActivity {
     private int NUMBER_OF_ITEMS;
 
     public static Context context;
-    public static String login;
-    public static String password;
+    public static String login, password;
 
     public static boolean userIsLoggedIn;
 
     private RecyclerView recyclerView;
     private EditText searchField, etSortBylanguage;
     private ProgressBar progressBar;
-    private TextView tvError;
+    private TextView tvError, tvUserLogin, tvUserMail;
     private DrawerLayout drawer;
     private NavigationView navView, loginNavView;
     private View headerView, loginHeaderView;
+    private JSONObject jsonUser;
 
     private NetworkUtil.SORT_BY sortBy;
 
@@ -119,6 +120,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        loginHeaderView = loginNavView.getHeaderView(0);
+        tvUserLogin = loginHeaderView.findViewById(R.id.tv_user_login);
+        tvUserMail = loginHeaderView.findViewById(R.id.tv_user_mail);
+
         navView = findViewById(R.id.nv_main);
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
@@ -184,6 +189,38 @@ public class MainActivity extends AppCompatActivity {
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            String login = data.getStringExtra("login");
+            String password = data.getStringExtra("password");
+            String jsonStr = data.getStringExtra("json");
+
+            MainActivity.login = login;
+            MainActivity.password = password;
+
+            loginNavView.inflateMenu(R.menu.main_activity_logged_in);
+            loginNavView.getMenu().findItem(R.id.action_log_in).setVisible(false);
+            tvUserLogin.setText(login);
+
+            String userMail = null;
+            try {
+                jsonUser = new JSONObject(jsonStr);
+                userMail = jsonUser.getString("email");
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            if (userMail != null && !userMail.equals("null")) {
+                tvUserMail.setText(userMail);
+            } else {
+                tvUserMail.setText("");
+            }
+
+        }
     }
 
     @Override
