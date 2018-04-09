@@ -2,6 +2,7 @@ package com.example.nikit.githubapp.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +25,6 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.nikit.githubapp.User;
 import com.example.nikit.githubapp.activities.layout.MyAdapter;
 import com.example.nikit.githubapp.R;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
@@ -41,8 +42,15 @@ public class MainActivity extends AppCompatActivity {
 
     public static Context context;
     public static String login, password;
+    public static JSONObject jsonUser;
+    private String jsonStr;
 
     public static boolean userIsLoggedIn;
+
+    private static final String PREFS_NAME = "preferences";
+    private static final String PREF_UNAME = "Username";
+    private static final String PREF_PASSWORD = "Password";
+    private static final String PREF_USER_JSON = "UserJSON";
 
     private RecyclerView recyclerView;
     private EditText searchField, etSortBylanguage;
@@ -51,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private NavigationView navView, loginNavView;
     private View headerView, loginHeaderView;
-    private JSONObject jsonUser;
 
     private NetworkUtil.SORT_BY sortBy;
 
@@ -113,10 +120,30 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_log_in:
                         Intent loginIntent = new Intent(context, LoginActivity.class);
                         startActivityForResult(loginIntent, 1);
-                        return true;
+                    break;
+
+                    case R.id.action_log_out:
+
+                        login = null;
+                        password = null;
+                        userIsLoggedIn = false;
+                        jsonUser = null;
+
+                        tvUserLogin.setText(R.string.github_login);
+                        tvUserMail.setText(R.string.email);
+
+                        loginNavView.inflateMenu(R.menu.main_activity_logged_out);
+                        Menu menu = loginNavView.getMenu();
+                        menu.setGroupVisible(R.id.group_log_out, false);
+                        menu.setGroupVisible(R.id.group_view_user_favorites, false);
+
+                        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                        SharedPreferences.Editor editor = preferences.edit();
+                        editor.remove("NOT_LOGIN_DATA");
+                        editor.commit();
                 }
 
-                return false;
+                return true;
             }
         });
 
@@ -192,34 +219,92 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        savePreferences();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadPreferences();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        savePreferences();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        savePreferences();
+    }
+
+    private void savePreferences() {
+
+        if (!userIsLoggedIn) return;
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+
+        // Save value
+        editor.putString(PREF_UNAME, login);
+        editor.putString(PREF_PASSWORD, password);
+        editor.putString(PREF_USER_JSON, jsonStr);
+        editor.commit();
+    }
+
+    private void loadPreferences() {
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+        // Get value
+        login = settings.getString(PREF_UNAME, null);
+        password = settings.getString(PREF_PASSWORD, null);
+        jsonStr = settings.getString(PREF_USER_JSON, null);
+
+        if (login != null && password != null && jsonStr != null) {
+            userIsLoggedIn = true;
+            inflateLoggedInMenu();
+        }
+    }
+
+    private void inflateLoggedInMenu() {
+        loginNavView.getMenu().findItem(R.id.action_log_in).setVisible(false);
+        loginNavView.inflateMenu(R.menu.main_activity_logged_in);
+        tvUserLogin.setText(login);
+
+        String userMail = null;
+        try {
+            jsonUser = new JSONObject(jsonStr);
+            userMail = jsonUser.getString("email");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if (userMail != null && !userMail.equals("null")) {
+            tvUserMail.setText(userMail);
+        } else {
+            tvUserMail.setText("");
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         if (resultCode == RESULT_OK) {
-            String login = data.getStringExtra("login");
-            String password = data.getStringExtra("password");
-            String jsonStr = data.getStringExtra("json");
 
-            MainActivity.login = login;
-            MainActivity.password = password;
+            userIsLoggedIn = true;
 
-            loginNavView.inflateMenu(R.menu.main_activity_logged_in);
-            loginNavView.getMenu().findItem(R.id.action_log_in).setVisible(false);
-            tvUserLogin.setText(login);
+            login = data.getStringExtra("login");
+            password = data.getStringExtra("password");
+            jsonStr = data.getStringExtra("json");
+            savePreferences();
 
-            String userMail = null;
-            try {
-                jsonUser = new JSONObject(jsonStr);
-                userMail = jsonUser.getString("email");
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            if (userMail != null && !userMail.equals("null")) {
-                tvUserMail.setText(userMail);
-            } else {
-                tvUserMail.setText("");
-            }
-
+            inflateLoggedInMenu();
         }
     }
 

@@ -83,7 +83,9 @@ public class ReadmeActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
 
-        new CheckStarRepoTask().execute(starRepoUrl);
+        if (MainActivity.userIsLoggedIn) {
+            new CheckStarRepoTask().execute(starRepoUrl);
+        }
 
         idShare = R.id.readme_menu_item_share;
         idOpenRepo = R.id.readme_menu_item_open_repo;
@@ -125,6 +127,14 @@ public class ReadmeActivity extends AppCompatActivity {
             return true;
 
         } else if (idClicked == idStarRepo) {
+
+            if (!MainActivity.userIsLoggedIn) {
+                Toast toast = Toast.makeText(context,
+                        "Необходима авторизация", Toast.LENGTH_SHORT);
+                toast.show();
+                return true;
+            }
+
             if (!repoIsChecked) {
                 new StarRepoTask().execute(starRepoUrl);
             } else {

@@ -32,7 +32,6 @@
     <string name="title_activity_main2">Main2Activity</string>
     <string name="email">email</string>
     <string name="github_login">Github login</string>
-    <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -52,4 +51,5 @@
     <string name="wrongLoginOrPassword">Неверный логин или пароль!</string>
     <string name="starred">Избранное</string>
     <string name="repos">Репозитории</string>
+    <string name="logOut">Выйти</string>
 </resources>
