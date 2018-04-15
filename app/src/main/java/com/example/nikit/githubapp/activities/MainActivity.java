@@ -21,8 +21,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.nikit.githubapp.activities.layout.MyAdapter;
@@ -36,15 +39,20 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
     private int NUMBER_OF_ITEMS;
+    private Set<String> languageSet;
+    private int checkLanguageSelection = 0;
 
     public static Context context;
     public static String login, password;
     public static JSONObject jsonUser;
     private String jsonStr;
+    private JSONArray reposJsonArray;
 
     public static boolean userIsLoggedIn;
 
@@ -54,7 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREF_USER_JSON = "UserJSON";
 
     private RecyclerView recyclerView;
-    private EditText searchField, etSortBylanguage;
+    private EditText searchField;
+    private Spinner spinnerSortByLang;
     private ProgressBar progressBar;
     private TextView tvError, tvUserLogin, tvUserMail;
     private DrawerLayout drawer;
@@ -157,9 +166,7 @@ public class MainActivity extends AppCompatActivity {
                         new QueryAuthTask().execute(userReposUrl);
 
                     break;
-
                 }
-
                 return true;
             }
         });
@@ -205,21 +212,38 @@ public class MainActivity extends AppCompatActivity {
         });
 
         headerView = navView.getHeaderView(0);
-        etSortBylanguage = headerView.findViewById(R.id.et_sort_by_language);
-
-        etSortBylanguage.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        spinnerSortByLang = headerView.findViewById(R.id.sp_sort_by_language);
+        spinnerSortByLang.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                    drawer.closeDrawers();
-                    makeSearchQuery(new View(context));
-                    return true;
+                if (checkLanguageSelection++ == 0) return;
+
+                JSONArray sortedJsonArray = new JSONArray();
+                try {
+                    String selectedLanguage = (String) spinnerSortByLang.getSelectedItem();
+                    if (selectedLanguage.equals("") || selectedLanguage == null) { return; }
+
+                    for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
+                        if (reposJsonArray.getJSONObject(i).
+                                getString("language").equals(selectedLanguage)) {
+
+                            sortedJsonArray.put(reposJsonArray.getJSONObject(i));
+                        }
+                    }
+
+                    makeUpData(sortedJsonArray);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                return false;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
-
         searchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -348,8 +372,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeUpData(JSONArray array) {
-        int nItems = array.length();
-        recyclerView.setAdapter(new MyAdapter(nItems, array, this));
+
+        reposJsonArray = array;
+
+        NUMBER_OF_ITEMS = array.length();
+        recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, array, this));
+
+        try {
+            languageSet = new HashSet<>();
+            JSONObject jsonObject;
+            for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
+                jsonObject = array.getJSONObject(i);
+                languageSet.add(jsonObject.getString("language"));
+            }
+
+            if (languageSet.contains("null")) {
+                languageSet.remove("null");
+            }
+
+            String languages[] = new String[languageSet.size()];
+            int i = 0;
+            for (String str : languageSet) {
+                languages[i++] = str;
+            }
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_item, languages);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerSortByLang.setAdapter(adapter);
+
+            spinnerSortByLang.setVisibility(View.VISIBLE);
+            checkLanguageSelection = 0;
+
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     private void makeUpData(String s) {
@@ -360,7 +418,37 @@ public class MainActivity extends AppCompatActivity {
             NUMBER_OF_ITEMS = numberOfItems > 100 ? 100 : numberOfItems;
 
             itemsArray = jsonRespond.getJSONArray("items");
+            reposJsonArray = itemsArray;
             recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, itemsArray, this));
+
+            try {
+                languageSet = new HashSet<>();
+                JSONObject jsonObject;
+                for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
+                    jsonObject = itemsArray.getJSONObject(i);
+                    languageSet.add(jsonObject.getString("language"));
+                }
+
+                if (languageSet.contains("null")) {
+                    languageSet.remove("null");
+                }
+
+                String languages[] = new String[languageSet.size()];
+                int i = 0;
+                for (String str : languageSet) {
+                    languages[i++] = str;
+                }
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                        android.R.layout.simple_spinner_item, languages);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerSortByLang.setAdapter(adapter);
+                spinnerSortByLang.setVisibility(View.VISIBLE);
+                checkLanguageSelection = 0;
+
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+            }
         } catch (JSONException ex) {
             ex.printStackTrace();
         }
@@ -381,17 +469,12 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-
-        URL url = null;
-        String languageSort = etSortBylanguage.getText().toString();
-        if (languageSort.equals("") || languageSort == null) {
-            url = NetworkUtil.makeSearchURL(repoToSearch, sortBy);
+        URL url = NetworkUtil.makeSearchURL(repoToSearch, sortBy);
+        if (userIsLoggedIn) {
+            new QueryAuthTask().execute(url);
         } else {
-            url = NetworkUtil.makeSearchURL(repoToSearch, sortBy, languageSort);
+            new QueryTask().execute(url);
         }
-
-        QueryTask queryTask = new QueryTask();
-        queryTask.execute(url);
 
         hideKeyboard();
     }
