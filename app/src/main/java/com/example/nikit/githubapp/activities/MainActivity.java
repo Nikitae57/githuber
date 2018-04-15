@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import com.example.nikit.githubapp.activities.layout.MyAdapter;
 import com.example.nikit.githubapp.R;
+import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
 import org.json.JSONArray;
@@ -141,6 +142,22 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.remove("NOT_LOGIN_DATA");
                         editor.commit();
+                    break;
+
+                    case R.id.action_view_starred:
+
+                        URL starredUrl = NetworkUtil.makeUserStarredUrl(login);
+                        new QueryAuthTask().execute(starredUrl);
+
+                    break;
+
+                    case R.id.action_view_user_repos:
+
+                        URL userReposUrl = NetworkUtil.makeUserReposUrl(login);
+                        new QueryAuthTask().execute(userReposUrl);
+
+                    break;
+
                 }
 
                 return true;
@@ -227,7 +244,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        loadPreferences();
+
+        if (!userIsLoggedIn) {
+            loadPreferences();
+        }
     }
 
     @Override
@@ -243,8 +263,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void savePreferences() {
-
-        if (!userIsLoggedIn) return;
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -266,12 +284,13 @@ public class MainActivity extends AppCompatActivity {
         jsonStr = settings.getString(PREF_USER_JSON, null);
 
         if (login != null && password != null && jsonStr != null) {
-            userIsLoggedIn = true;
             inflateLoggedInMenu();
+            userIsLoggedIn = true;
         }
     }
 
     private void inflateLoggedInMenu() {
+
         loginNavView.getMenu().findItem(R.id.action_log_in).setVisible(false);
         loginNavView.inflateMenu(R.menu.main_activity_logged_in);
         tvUserLogin.setText(login);
@@ -295,16 +314,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (resultCode == RESULT_OK) {
+        hideKeyboard();
 
-            userIsLoggedIn = true;
+        if (resultCode == RESULT_OK) {
 
             login = data.getStringExtra("login");
             password = data.getStringExtra("password");
             jsonStr = data.getStringExtra("json");
-            savePreferences();
 
-            inflateLoggedInMenu();
+            savePreferences();
         }
     }
 
@@ -327,6 +345,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void makeUpData(JSONArray array) {
+        int nItems = array.length();
+        recyclerView.setAdapter(new MyAdapter(nItems, array, this));
     }
 
     private void makeUpData(String s) {
@@ -373,23 +396,56 @@ public class MainActivity extends AppCompatActivity {
         hideKeyboard();
     }
 
+    class QueryAuthTask extends QueryTask {
+        @Override
+        protected String doInBackground(URL... urls) {
+            String result = null;
+            try {
+                result = NetworkUtil.makeAuthRequest(urls[0],
+                        login, password, REQUEST_METHOD.GET);
+
+            } catch (IOException ioex) {
+                ioex.printStackTrace();
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (s != null && !s.equals("")) {
+                try {
+
+                    JSONArray jsonArray = new JSONArray(s);
+                    makeUpData(jsonArray);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                showResult();
+            } else {
+                showError();
+            }
+        }
+    }
+
     class QueryTask extends AsyncTask<URL, Void, String> {
 
-        private void showProgressBar() {
+        protected void showProgressBar() {
             progressBar.setVisibility(View.VISIBLE);
 
             recyclerView.setVisibility(View.INVISIBLE);
             tvError.setVisibility(View.INVISIBLE);
         }
 
-        private void showResult() {
+        protected void showResult() {
             recyclerView.setVisibility(View.VISIBLE);
 
             progressBar.setVisibility(View.INVISIBLE);
             tvError.setVisibility(View.INVISIBLE);
         }
 
-        private void showError() {
+        protected void showError() {
             tvError.setVisibility(View.VISIBLE);
 
             recyclerView.setVisibility(View.INVISIBLE);

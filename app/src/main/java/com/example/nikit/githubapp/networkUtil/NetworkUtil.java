@@ -44,6 +44,30 @@ public class NetworkUtil {
         return url;
     }
 
+    public static URL makeUserStarredUrl(String login) {
+        URL url = null;
+        try {
+            url = new URL(GITHUB_API_BASE_URL +
+                    "/users/" + login + "/starred");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+    public static URL makeUserReposUrl(String login) {
+        URL url = null;
+        try {
+            url = new URL(GITHUB_API_BASE_URL +
+                    "/users/" + login + "/repos");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
     public static URL makeSearchURL(String query, SORT_BY sort_by) {
 
         Uri uri;
