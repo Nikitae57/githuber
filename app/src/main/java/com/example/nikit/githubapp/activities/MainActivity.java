@@ -24,6 +24,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private NavigationView navView, loginNavView;
     private View headerView, loginHeaderView;
     private TextView tvSelectedLang;
+    private LinearLayout llSelectedLang;
 
     private NetworkUtil.SORT_BY sortBy;
 
@@ -215,15 +217,8 @@ public class MainActivity extends AppCompatActivity {
 
         headerView = navView.getHeaderView(0);
         tvSelectedLang = headerView.findViewById(R.id.tv_selected_sort_lang);
-        tvSelectedLang.setVisibility(View.GONE);
-        tvSelectedLang.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                spinnerSortByLang.setVisibility(View.VISIBLE);
-                tvSelectedLang.setVisibility(View.GONE);
-                makeUpData(reposJsonArray);
-            }
-        });
+        llSelectedLang = headerView.findViewById(R.id.llSelectedLang);
+        llSelectedLang.setVisibility(View.GONE);
 
         spinnerSortByLang = headerView.findViewById(R.id.sp_sort_by_language);
         spinnerSortByLang.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -236,8 +231,6 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     String selectedLanguage = (String) spinnerSortByLang.getSelectedItem();
                     if (selectedLanguage.equals("") || selectedLanguage == null) { return; }
-
-                    Log.d("TAG", selectedLanguage);
 
                     if (spinnerSortByLang.getSelectedItemPosition() == 0) {
                         reposAreSorted = false;
@@ -483,10 +476,17 @@ public class MainActivity extends AppCompatActivity {
 
         spinnerSortByLang.setVisibility(View.GONE);
         tvSelectedLang.setText(selectedLanguage);
-        tvSelectedLang.setVisibility(View.VISIBLE);
+        llSelectedLang.setVisibility(View.VISIBLE);
 
         NUMBER_OF_ITEMS = array.length();
         recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, array, this));
+    }
+
+    public void UnsortRepos(View view) {
+
+        spinnerSortByLang.setVisibility(View.VISIBLE);
+        llSelectedLang.setVisibility(View.GONE);
+        makeUpData(reposJsonArray);
     }
 
     private void hideKeyboard() {
@@ -538,9 +538,7 @@ public class MainActivity extends AppCompatActivity {
                     makeUpData(jsonArray);
 
                 } catch (JSONException e) {
-
                     makeUpData(s);
-                    e.printStackTrace();
                 }
                 showResult();
             } else {

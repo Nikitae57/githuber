@@ -1,51 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="5dp"
     android:theme="@style/ThemeOverlay.AppCompat.Light">
 
-
     <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:text="@string/foundLanguages"
-        android:textColor="@android:color/black" />
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
         android:id="@+id/sp_sort_by_language"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="24dp"
 
         android:layout_margin="5dp"
-        android:visibility="invisible" />
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:id="@+id/llSelectedLang"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:onClick="UnsortRepos"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sp_sort_by_language">
 
         <TextView
             android:id="@+id/tv_selected_sort_lang"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/rounded_cornerns_black_background"
             android:text=""
             android:textColor="@android:color/white"
             android:textSize="18sp"
-            android:visibility="invisible" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/sp_sort_by_language" />
 
         <ImageButton
             android:id="@+id/imageButton"
             android:layout_width="wrap_content"
             android:layout_height="24dp"
+            android:layout_marginTop="8dp"
             android:background="@android:color/transparent"
+            app:layout_constraintStart_toEndOf="@+id/tv_selected_sort_lang"
+            app:layout_constraintTop_toBottomOf="@+id/sp_sort_by_language"
             app:srcCompat="@drawable/ic_close" />
     </LinearLayout>
-
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
