@@ -64,6 +64,6 @@
 
     </LinearLayout>
 
-    <include layout="@layout/nv_login"/>
+    <include layout="@layout/main_activity_nv_login"/>
 
 </android.support.v4.widget.DrawerLayout>

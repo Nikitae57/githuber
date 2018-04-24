@@ -67,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText searchField;
     private Spinner spinnerSortByLang;
     private ProgressBar progressBar;
-    private TextView tvError, tvUserLogin, tvUserMail;
+    private TextView tvError, tvUserLogin,
+            tvUserMail, tvSortFoundLangs;
     private DrawerLayout drawer;
     private NavigationView navView, loginNavView;
     private View headerView, loginHeaderView;
@@ -82,10 +83,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        context = getApplicationContext();
 
-        sortBy = NetworkUtil.SORT_BY.BEST_MATCH;
-        userIsLoggedIn = false;
+        initStartValues();
+        setToolbarAndActionBar();
+        findViews();
+        setListeners();
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+    }
+
+    private void setToolbarAndActionBar() {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -93,6 +101,9 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+    }
+
+    private void findViews() {
 
         searchField = findViewById(R.id.etQuery);
         progressBar = findViewById(R.id.progressBar);
@@ -100,6 +111,22 @@ public class MainActivity extends AppCompatActivity {
         tvError = findViewById(R.id.tvError);
 
         drawer = findViewById(R.id.drawer_layout);
+        loginNavView = findViewById(R.id.nv_main_login);
+        loginHeaderView = loginNavView.getHeaderView(0);
+        tvUserLogin = loginHeaderView.findViewById(R.id.tv_user_login);
+        tvUserMail = loginHeaderView.findViewById(R.id.tv_user_mail);
+
+        navView = findViewById(R.id.nv_main);
+        headerView = navView.getHeaderView(0);
+        tvSelectedLang = headerView.findViewById(R.id.tv_selected_sort_lang);
+        llSelectedLang = headerView.findViewById(R.id.llSelectedLang);
+        tvSortFoundLangs = headerView.findViewById(R.id.tvSortFoundLangs);
+        llSelectedLang.setVisibility(View.GONE);
+        spinnerSortByLang = headerView.findViewById(R.id.sp_sort_by_language);
+    }
+
+    private void setListeners() {
+
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
@@ -123,9 +150,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-        loginNavView = findViewById(R.id.nv_main_login);
         loginNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 drawer.closeDrawers();
@@ -134,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_log_in:
                         Intent loginIntent = new Intent(context, LoginActivity.class);
                         startActivityForResult(loginIntent, 1);
-                    break;
+                        break;
 
                     case R.id.action_log_out:
 
@@ -155,31 +181,25 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.remove("NOT_LOGIN_DATA");
                         editor.commit();
-                    break;
+                        break;
 
                     case R.id.action_view_starred:
 
                         URL starredUrl = NetworkUtil.makeUserStarredUrl(login);
                         new QueryAuthTask().execute(starredUrl);
 
-                    break;
+                        break;
 
                     case R.id.action_view_user_repos:
 
                         URL userReposUrl = NetworkUtil.makeUserReposUrl(login);
                         new QueryAuthTask().execute(userReposUrl);
 
-                    break;
+                        break;
                 }
                 return true;
             }
         });
-
-        loginHeaderView = loginNavView.getHeaderView(0);
-        tvUserLogin = loginHeaderView.findViewById(R.id.tv_user_login);
-        tvUserMail = loginHeaderView.findViewById(R.id.tv_user_mail);
-
-        navView = findViewById(R.id.nv_main);
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
             @Override
@@ -194,19 +214,19 @@ public class MainActivity extends AppCompatActivity {
                 switch (item.getItemId()) {
                     case R.id.action_sort_by_best_match:
                         sortBy = NetworkUtil.SORT_BY.BEST_MATCH;
-                    break;
+                        break;
 
                     case R.id.action_sort_by_stars:
                         sortBy = NetworkUtil.SORT_BY.MOST_STARS;
-                    break;
+                        break;
 
                     case R.id.action_sort_by_forks:
                         sortBy = NetworkUtil.SORT_BY.MOST_FORKS;
-                    break;
+                        break;
 
                     case R.id.action_sort_by_updates:
                         sortBy = NetworkUtil.SORT_BY.RECENTLY_UPDATED;
-                    break;
+                        break;
                 }
 
                 makeSearchQuery(new View(context));
@@ -214,13 +234,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-
-        headerView = navView.getHeaderView(0);
-        tvSelectedLang = headerView.findViewById(R.id.tv_selected_sort_lang);
-        llSelectedLang = headerView.findViewById(R.id.llSelectedLang);
-        llSelectedLang.setVisibility(View.GONE);
-
-        spinnerSortByLang = headerView.findViewById(R.id.sp_sort_by_language);
         spinnerSortByLang.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -269,8 +282,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
+    }
+
+    private void initStartValues() {
+        context = getApplicationContext();
+
+        sortBy = NetworkUtil.SORT_BY.BEST_MATCH;
+        userIsLoggedIn = false;
     }
 
     @Override
@@ -389,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
 
         NUMBER_OF_ITEMS = array.length();
         recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, array, this));
+        tvSortFoundLangs.setVisibility(View.VISIBLE);
 
         try {
             languageSet = new HashSet<>();
@@ -424,6 +443,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeUpData(String s) {
+
+        tvSortFoundLangs.setVisibility(View.VISIBLE);
+        
         try {
 
             JSONObject jsonRespond = new JSONObject(s);

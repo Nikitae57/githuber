@@ -9,4 +9,4 @@
     android:layout_gravity="start"
     android:fitsSystemWindows="false"
     app:menu="@menu/main_activity_logged_out"
-    app:headerLayout="@layout/nav_header_login" />
+    app:headerLayout="@layout/main_activity_header_login" />
