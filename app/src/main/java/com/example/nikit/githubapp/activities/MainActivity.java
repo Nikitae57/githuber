@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private int NUMBER_OF_ITEMS;
     private Set<String> languageSet;
     private int checkLanguageSelection = 0;
+    private boolean reposAreSorted = false;
 
     public static Context context;
     public static String login, password;
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private NavigationView navView, loginNavView;
     private View headerView, loginHeaderView;
+    private TextView tvSelectedLang;
 
     private NetworkUtil.SORT_BY sortBy;
 
@@ -212,6 +214,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
         headerView = navView.getHeaderView(0);
+        tvSelectedLang = headerView.findViewById(R.id.tv_selected_sort_lang);
+        tvSelectedLang.setVisibility(View.GONE);
+        tvSelectedLang.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                spinnerSortByLang.setVisibility(View.VISIBLE);
+                tvSelectedLang.setVisibility(View.GONE);
+                makeUpData(reposJsonArray);
+            }
+        });
+
         spinnerSortByLang = headerView.findViewById(R.id.sp_sort_by_language);
         spinnerSortByLang.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -224,6 +237,13 @@ public class MainActivity extends AppCompatActivity {
                     String selectedLanguage = (String) spinnerSortByLang.getSelectedItem();
                     if (selectedLanguage.equals("") || selectedLanguage == null) { return; }
 
+                    Log.d("TAG", selectedLanguage);
+
+                    if (spinnerSortByLang.getSelectedItemPosition() == 0) {
+                        reposAreSorted = false;
+                        makeUpData(reposJsonArray);
+                    }
+
                     for (int i = 0; i < NUMBER_OF_ITEMS; i++) {
                         if (reposJsonArray.getJSONObject(i).
                                 getString("language").equals(selectedLanguage)) {
@@ -232,7 +252,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    makeUpData(sortedJsonArray);
+                    reposAreSorted = true;
+                    sortRepos(sortedJsonArray, selectedLanguage);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -373,8 +394,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeUpData(JSONArray array) {
 
-        reposJsonArray = array;
-
         NUMBER_OF_ITEMS = array.length();
         recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, array, this));
 
@@ -390,8 +409,9 @@ public class MainActivity extends AppCompatActivity {
                 languageSet.remove("null");
             }
 
-            String languages[] = new String[languageSet.size()];
-            int i = 0;
+            String languages[] = new String[languageSet.size() + 1];
+            languages[0] = "Все";
+            int i = 1;
             for (String str : languageSet) {
                 languages[i++] = str;
             }
@@ -412,13 +432,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeUpData(String s) {
         try {
+
             JSONObject jsonRespond = new JSONObject(s);
             int numberOfItems = jsonRespond.getJSONArray("items").length();
-
             NUMBER_OF_ITEMS = numberOfItems > 100 ? 100 : numberOfItems;
 
             itemsArray = jsonRespond.getJSONArray("items");
-            reposJsonArray = itemsArray;
+
+            if (!reposAreSorted) {
+                reposJsonArray = itemsArray;
+            }
+
             recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, itemsArray, this));
 
             try {
@@ -433,8 +457,9 @@ public class MainActivity extends AppCompatActivity {
                     languageSet.remove("null");
                 }
 
-                String languages[] = new String[languageSet.size()];
-                int i = 0;
+                String languages[] = new String[languageSet.size() + 1];
+                languages[0] = "Все";
+                int i = 1;
                 for (String str : languageSet) {
                     languages[i++] = str;
                 }
@@ -452,6 +477,16 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private void sortRepos(JSONArray array, String selectedLanguage) {
+
+        spinnerSortByLang.setVisibility(View.GONE);
+        tvSelectedLang.setText(selectedLanguage);
+        tvSelectedLang.setVisibility(View.VISIBLE);
+
+        NUMBER_OF_ITEMS = array.length();
+        recyclerView.setAdapter(new MyAdapter(NUMBER_OF_ITEMS, array, this));
     }
 
     private void hideKeyboard() {
@@ -503,6 +538,8 @@ public class MainActivity extends AppCompatActivity {
                     makeUpData(jsonArray);
 
                 } catch (JSONException e) {
+
+                    makeUpData(s);
                     e.printStackTrace();
                 }
                 showResult();

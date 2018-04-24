@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -12,7 +13,8 @@
         android:layout_height="match_parent"
         android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
-        android:text="@string/foundLanguages" />
+        android:text="@string/foundLanguages"
+        android:textColor="@android:color/black" />
 
     <Spinner
         android:id="@+id/sp_sort_by_language"
@@ -21,5 +23,29 @@
 
         android:layout_margin="5dp"
         android:visibility="invisible" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_selected_sort_lang"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/rounded_cornerns_black_background"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:visibility="invisible" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="24dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/ic_close" />
+    </LinearLayout>
 
 </LinearLayout>
