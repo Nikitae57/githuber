@@ -23,11 +23,19 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class NetworkUtil {
 
-    final static String GITHUB_API_BASE_URL = "https://api.github.com";
-    final static String GITHUB_SEARCH_URL = "https://api.github.com/search/repositories";
-    final static String PARAM_QUERY = "q";
-    final static String PARAM_SORT = "sort";
-    final static String PARAM_LANG = "language";
+    private final static String GITHUB_API_BASE_URL = "https://api.github.com";
+    private final static String GITHUB_SEARCH_URL = "https://api.github.com/search/repositories";
+    private final static String PARAM_QUERY = "q";
+    private final static String PARAM_SORT = "sort";
+    private final static String PARAM_LANG = "language";
+
+    private final static String REPOS = "repos";
+    private final static String BRANCHES = "branches";
+    private final static String MASTER = "master";
+    private final static String USER = "user";
+    private final static String GIT = "git";
+    private final static String TREES = "trees";
+
     private static String sortBy;
 
     final static String README_BASE_URL = "https://api.github.com/repos";
@@ -36,7 +44,7 @@ public class NetworkUtil {
 
         URL url = null;
         try {
-            url =  new URL(GITHUB_API_BASE_URL + "/user");
+            url =  new URL(GITHUB_API_BASE_URL + "/" + USER);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -131,6 +139,39 @@ public class NetworkUtil {
             url = new URL(uri.toString());
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
+        }
+
+        return url;
+    }
+
+    public static URL makeMasterBranchURL(String fullName) {
+
+        Uri uri = Uri.parse(GITHUB_API_BASE_URL).buildUpon().
+            appendPath(REPOS).appendPath(fullName).
+            appendPath(BRANCHES).appendPath(MASTER).build();
+
+        URL url = null;
+        try {
+            url = new URL(uri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+    public static URL makeMasterTreeUrl(String fullName, String sha) {
+
+        Uri uri = Uri.parse(GITHUB_API_BASE_URL).buildUpon().
+                appendPath(REPOS).appendPath(fullName).
+                appendPath(GIT).appendPath(TREES).
+                appendPath(sha).build();
+
+        URL url = null;
+        try {
+            url = new URL(uri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
 
         return url;

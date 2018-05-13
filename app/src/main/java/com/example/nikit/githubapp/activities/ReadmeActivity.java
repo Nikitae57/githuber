@@ -27,6 +27,7 @@ import com.example.nikit.githubapp.activities.MainActivity;
 import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,6 +54,7 @@ public class ReadmeActivity extends AppCompatActivity {
             repoFullName,
             repoJsonStr;
     private JSONObject repoJSON;
+    private JSONArray repoFilesArray;
     private URL starRepoUrl, readmeUrl;
     private boolean repoIsChecked;
     private int respondCode;
@@ -371,6 +373,78 @@ public class ReadmeActivity extends AppCompatActivity {
         }
     }
 
+    class QueryFileListTask extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected String doInBackground(URL... urls) {
+
+            String treeStr = null;
+            try {
+                treeStr = NetworkUtil.makeAuthRequest(urls[0],
+                        MainActivity.login, MainActivity.password, REQUEST_METHOD.GET);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return treeStr;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            JSONArray filesArray = null;
+            try {
+                JSONObject treeJSON = new JSONObject(s);
+                filesArray = treeJSON.getJSONArray("tree");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            repoFilesArray = filesArray;
+        }
+    }
+
+    class QueryMasterTreeShaTask extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            showProgressBar();
+        }
+
+        @Override
+        protected String doInBackground(URL... urls) {
+
+            String respond = null;
+            try {
+                respond = NetworkUtil.makeAuthRequest(urls[0],
+                        MainActivity.login, MainActivity.password, REQUEST_METHOD.GET);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return respond;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            String treeSha = null;
+            try {
+                JSONObject masterBranchJSON = new JSONObject(s);
+
+                treeSha = masterBranchJSON.
+                        getJSONObject("commit").getJSONObject("commit").
+                        getJSONObject("tree").getString("sha");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            if (treeSha == null) { return; }
+
+            URL masterTreeUrl = NetworkUtil.makeMasterTreeUrl(repoFullName, treeSha);
+            new QueryFileListTask().execute(masterTreeUrl);
+        }
+    }
 
     private void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
