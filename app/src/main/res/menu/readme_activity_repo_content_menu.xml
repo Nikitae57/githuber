@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_show_repo_readme"
+        android:icon="@drawable/ic_readme"
+        android:title="@string/readme" />
+
+    <item
+        android:id="@+id/action_show_repo_file"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_folder"
+        android:title="@string/files" />
+
+</menu>

@@ -64,6 +64,6 @@
 
     </LinearLayout>
 
-    <include layout="@layout/main_activity_nv_login"/>
+    <include layout="@layout/readme_activity_nv_repo_content"/>
 
 </android.support.v4.widget.DrawerLayout>

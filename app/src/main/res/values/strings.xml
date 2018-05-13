@@ -53,4 +53,6 @@
     <string name="repos">Репозитории</string>
     <string name="logOut">Выйти</string>
     <string name="foundLanguages">Найденные языки</string>
+    <string name="readme">Readme</string>
+    <string name="files">Файлы</string>
 </resources>

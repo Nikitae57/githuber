@@ -136,6 +136,18 @@ public class NetworkUtil {
         return url;
     }
 
+    public static URL makeApiRepoUrl(String fullName) {
+
+        URL url = null;
+        try {
+            url =  new URL(GITHUB_API_BASE_URL + "/repos/" + fullName);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
     public static URL makeStarRepoURL(String repoFullName) {
 
         URL url = null;

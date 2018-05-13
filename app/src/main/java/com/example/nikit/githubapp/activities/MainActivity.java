@@ -281,7 +281,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-
     }
 
     private void initStartValues() {
@@ -445,7 +444,7 @@ public class MainActivity extends AppCompatActivity {
     private void makeUpData(String s) {
 
         tvSortFoundLangs.setVisibility(View.VISIBLE);
-        
+
         try {
 
             JSONObject jsonRespond = new JSONObject(s);

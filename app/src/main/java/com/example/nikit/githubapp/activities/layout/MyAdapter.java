@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -149,9 +150,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
             String repoFullName = null;
             String repoUrl = null;
+            String repoJsonStr = null;
             try {
                 repoFullName = ((JSONObject) itemsArray.get(position)).getString("full_name");
                 repoUrl = ((JSONObject) itemsArray.get(position)).getString("html_url");
+                repoJsonStr = itemsArray.get(position).toString();
+                Log.d("STR", repoJsonStr);
             } catch (JSONException ex) {
                 ex.printStackTrace();
             }
@@ -163,6 +167,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             extras.putString("readmeUrl", readmeUrl.toString());
             extras.putString("repoUrl", repoUrl);
             extras.putString("repoFullName", repoFullName);
+            extras.putString("repoJSON", repoJsonStr);
             readmeIntent.putExtras(extras);
             context.startActivity(readmeIntent);
         }

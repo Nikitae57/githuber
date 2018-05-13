@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -11,6 +13,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,19 +36,24 @@ import java.net.URL;
 
 public class ReadmeActivity extends AppCompatActivity {
 
-    private TextView tvError;
+    private TextView tvError, tvRepoStars,
+            tvRepoViews, tvRepoForks, tvRepoName;
     private ProgressBar progressBar;
     private ScrollView scrollView;
     private com.mukesh.MarkdownView mdView;
     private Menu menu;
     private DrawerLayout drawer;
+    private NavigationView navView;
+    private View headerView;
 
     private int idShare, idOpenRepo, idStarRepo;
     private Context context;
 
-    private String repoUrl;
-    private String repoFullName;
-    private URL starRepoUrl;
+    private String repoUrl,
+            repoFullName,
+            repoJsonStr;
+    private JSONObject repoJSON;
+    private URL starRepoUrl, readmeUrl;
     private boolean repoIsChecked;
     private int respondCode;
 
@@ -54,7 +62,15 @@ public class ReadmeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_readme);
 
-        context = this;
+        findViews();
+        setDefaultValues();
+        setToolbarAndActionBar();
+
+        new QueryReadmeTask().execute(readmeUrl);
+        Log.d("TAG", readmeUrl.toString());
+    }
+
+    private void setToolbarAndActionBar() {
 
         Toolbar toolbar = findViewById(R.id.toolbar_readme);
         setSupportActionBar(toolbar);
@@ -62,6 +78,9 @@ public class ReadmeActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+    }
+
+    private void findViews() {
 
         drawer = findViewById(R.id.readme_drawer);
         progressBar = findViewById(R.id.pb_ReadmeProgressbar);
@@ -69,8 +88,20 @@ public class ReadmeActivity extends AppCompatActivity {
         tvError = findViewById(R.id.tv_ReadmeError);
         scrollView = findViewById(R.id.sv_readmeScrollView);
 
+        navView = findViewById(R.id.nv_readme_repo_content);
+        headerView = navView.getHeaderView(0);
+        tvRepoForks = headerView.findViewById(R.id.tv_ReadmeRepoForks);
+        tvRepoName = headerView.findViewById(R.id.tv_ReadmeRepoName);
+        tvRepoStars = headerView.findViewById(R.id.tv_ReadmeRepoStars);
+        tvRepoViews = headerView.findViewById(R.id.tv_ReadmeRepoViews);
+    }
+
+    private void setDefaultValues() {
+
+        context = this;
+
         repoIsChecked = false;
-        URL readmeUrl = null;
+        readmeUrl = null;
         Intent receivedIntent = getIntent();
 
         try {
@@ -78,20 +109,47 @@ public class ReadmeActivity extends AppCompatActivity {
             repoUrl = extras.getString("repoUrl");
             readmeUrl = new URL(extras.getString("readmeUrl"));
             repoFullName = extras.getString("repoFullName");
+            repoJsonStr = extras.getString("repoJSON");
             starRepoUrl = NetworkUtil.makeStarRepoURL(repoFullName);
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
+        }
+
+        try {
+            repoJSON = new JSONObject(repoJsonStr);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         if (MainActivity.userIsLoggedIn) {
             new CheckStarRepoTask().execute(starRepoUrl);
         }
 
+        tvRepoName.setText(repoFullName);
+
         idShare = R.id.readme_menu_item_share;
         idOpenRepo = R.id.readme_menu_item_open_repo;
         idStarRepo = R.id.readme_menu_item_star_repo;
+    }
 
-        new QueryReadmeTask().execute(readmeUrl);
+    private void setListeners() {
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                if (item.isChecked()) {
+                    return true;
+                }
+
+                switch (item.getItemId()) {
+                    case R.id.action_show_repo_readme:
+                        //TODO make something
+                    break;
+                }
+
+                return true;
+            }
+        });
     }
 
     @Override
@@ -166,6 +224,9 @@ public class ReadmeActivity extends AppCompatActivity {
                 JSONObject jsonRespond = new JSONObject(apiRespond);
                 String readmeUrlStr = jsonRespond.getString("download_url");
 
+                URL repoApiUrl = NetworkUtil.makeApiRepoUrl(repoFullName);
+
+                repoJsonStr = NetworkUtil.makeHTTPRequest(repoApiUrl);
                 readmeRawText = NetworkUtil.makeHTTPRequest(new URL(readmeUrlStr));
 
             } catch (IOException | JSONException ex) {
@@ -186,6 +247,23 @@ public class ReadmeActivity extends AppCompatActivity {
 
             showResult();
             mdView.setMarkDownText(s);
+
+            try {
+
+                repoJSON = new JSONObject(repoJsonStr);
+
+                String nStars = repoJSON.getString("stargazers_count");
+                String nForks = repoJSON.getString("forks_count");
+                String nViews = repoJSON.getString("subscribers_count");
+
+                tvRepoStars.setText(nStars);
+                tvRepoForks.setText(nForks);
+                tvRepoViews.setText(nViews);
+
+            } catch (JSONException e) {
+                Log.d("TAG", "NO SUBSCR");
+                e.printStackTrace();
+            }
         }
     }
 
