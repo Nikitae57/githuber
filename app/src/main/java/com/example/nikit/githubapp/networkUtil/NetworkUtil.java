@@ -146,9 +146,12 @@ public class NetworkUtil {
 
     public static URL makeMasterBranchURL(String fullName) {
 
+        String ownerRepoSplit[] = fullName.split("/");
+
         Uri uri = Uri.parse(GITHUB_API_BASE_URL).buildUpon().
-            appendPath(REPOS).appendPath(fullName).
-            appendPath(BRANCHES).appendPath(MASTER).build();
+            appendPath(REPOS).appendPath(ownerRepoSplit[0]).
+            appendPath(ownerRepoSplit[1]).appendPath(BRANCHES).
+            appendPath(MASTER).build();
 
         URL url = null;
         try {
@@ -162,10 +165,12 @@ public class NetworkUtil {
 
     public static URL makeMasterTreeUrl(String fullName, String sha) {
 
+        String ownerRepoSplit[] = fullName.split("/");
+
         Uri uri = Uri.parse(GITHUB_API_BASE_URL).buildUpon().
-                appendPath(REPOS).appendPath(fullName).
-                appendPath(GIT).appendPath(TREES).
-                appendPath(sha).build();
+                appendPath(REPOS).appendPath(ownerRepoSplit[0]).
+                appendPath(ownerRepoSplit[1]).appendPath(GIT).
+                appendPath(TREES).appendPath(sha).build();
 
         URL url = null;
         try {

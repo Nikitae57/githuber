@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.nikit.githubapp.R;
@@ -20,6 +21,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etLogin, etPassword;
     private TextView tvWrong;
+    private ProgressBar progressBar;
 
     private String login, password;
 
@@ -31,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
         etLogin = findViewById(R.id.et_login_or_email);
         etPassword = findViewById(R.id.et_password);
         tvWrong = findViewById(R.id.tv_wrong_login_or_password);
+        progressBar = findViewById(R.id.login_progress_bar);
     }
 
     public void login(View view) {
@@ -49,11 +52,23 @@ public class LoginActivity extends AppCompatActivity {
         new AuthTask().execute(url);
     }
 
+    private void showProgressBar() {
+
+        tvWrong.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void showError() {
+
+        progressBar.setVisibility(View.INVISIBLE);
+        tvWrong.setVisibility(View.VISIBLE);
+    }
+
     class AuthTask extends AsyncTask<URL, Void, String> {
 
         @Override
         protected void onPreExecute() {
-            tvWrong.setVisibility(View.INVISIBLE);
+            showProgressBar();
         }
 
         @Override
@@ -80,8 +95,9 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String respond) {
+
             if (respond == null) {
-                tvWrong.setVisibility(View.VISIBLE);
+                showError();
                 return;
             }
 
@@ -91,7 +107,6 @@ public class LoginActivity extends AppCompatActivity {
             intent.putExtra("json", respond);
             setResult(Activity.RESULT_OK, intent);
             finish();
-
         }
     }
 }

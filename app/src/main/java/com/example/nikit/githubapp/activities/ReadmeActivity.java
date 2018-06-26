@@ -12,6 +12,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -23,7 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nikit.githubapp.R;
-import com.example.nikit.githubapp.activities.MainActivity;
+import com.example.nikit.githubapp.activities.layout.RepoFilesAdapter;
 import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
@@ -46,6 +48,8 @@ public class ReadmeActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private NavigationView navView;
     private View headerView;
+    private RecyclerView rvFiles;
+    private RecyclerView.LayoutManager layoutManager;
 
     private int idShare, idOpenRepo, idStarRepo;
     private Context context;
@@ -58,6 +62,7 @@ public class ReadmeActivity extends AppCompatActivity {
     private URL starRepoUrl, readmeUrl;
     private boolean repoIsChecked;
     private int respondCode;
+    private boolean filesDownloaded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +72,12 @@ public class ReadmeActivity extends AppCompatActivity {
         findViews();
         setDefaultValues();
         setToolbarAndActionBar();
+        setListeners();
+
+        layoutManager = new LinearLayoutManager(this);
+        rvFiles.setLayoutManager(layoutManager);
 
         new QueryReadmeTask().execute(readmeUrl);
-        Log.d("TAG", readmeUrl.toString());
     }
 
     private void setToolbarAndActionBar() {
@@ -89,6 +97,7 @@ public class ReadmeActivity extends AppCompatActivity {
         mdView = findViewById(R.id.mdv_readme);
         tvError = findViewById(R.id.tv_ReadmeError);
         scrollView = findViewById(R.id.sv_readmeScrollView);
+        rvFiles = findViewById(R.id.rv_readme);
 
         navView = findViewById(R.id.nv_readme_repo_content);
         headerView = navView.getHeaderView(0);
@@ -96,6 +105,8 @@ public class ReadmeActivity extends AppCompatActivity {
         tvRepoName = headerView.findViewById(R.id.tv_ReadmeRepoName);
         tvRepoStars = headerView.findViewById(R.id.tv_ReadmeRepoStars);
         tvRepoViews = headerView.findViewById(R.id.tv_ReadmeRepoViews);
+
+        navView.setCheckedItem(R.id.action_show_repo_readme);
     }
 
     private void setDefaultValues() {
@@ -103,6 +114,7 @@ public class ReadmeActivity extends AppCompatActivity {
         context = this;
 
         repoIsChecked = false;
+        filesDownloaded = false;
         readmeUrl = null;
         Intent receivedIntent = getIntent();
 
@@ -142,10 +154,26 @@ public class ReadmeActivity extends AppCompatActivity {
                 if (item.isChecked()) {
                     return true;
                 }
+                item.setCheckable(true);
 
                 switch (item.getItemId()) {
                     case R.id.action_show_repo_readme:
-                        //TODO make something
+
+                        showReadme();
+
+                    break;
+
+                    case R.id.action_show_repo_file:
+
+                        if (filesDownloaded) {
+                            showFiles();
+
+                        } else {
+                            URL masterBranchUrl = NetworkUtil.makeMasterBranchURL(repoFullName);
+                            new QueryMasterTreeShaTask().execute(masterBranchUrl);
+                            showFiles();
+                        }
+
                     break;
                 }
 
@@ -247,7 +275,7 @@ public class ReadmeActivity extends AppCompatActivity {
                 return;
             }
 
-            showResult();
+            showReadme();
             mdView.setMarkDownText(s);
 
             try {
@@ -394,13 +422,17 @@ public class ReadmeActivity extends AppCompatActivity {
 
             JSONArray filesArray = null;
             try {
+
                 JSONObject treeJSON = new JSONObject(s);
                 filesArray = treeJSON.getJSONArray("tree");
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
             repoFilesArray = filesArray;
+            rvFiles.setAdapter(new RepoFilesAdapter(repoFilesArray));
+            showFiles();
         }
     }
 
@@ -428,6 +460,7 @@ public class ReadmeActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
 
+            Log.d("SHA", s);
             String treeSha = null;
             try {
                 JSONObject masterBranchJSON = new JSONObject(s);
@@ -439,7 +472,7 @@ public class ReadmeActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            if (treeSha == null) { return; }
+            if (treeSha == null || treeSha.equals("null")) { return; }
 
             URL masterTreeUrl = NetworkUtil.makeMasterTreeUrl(repoFullName, treeSha);
             new QueryFileListTask().execute(masterTreeUrl);
@@ -451,6 +484,7 @@ public class ReadmeActivity extends AppCompatActivity {
 
         scrollView.setVisibility(View.INVISIBLE);
         tvError.setVisibility(View.INVISIBLE);
+        rvFiles.setVisibility(View.INVISIBLE);
     }
 
     private void showError() {
@@ -458,12 +492,22 @@ public class ReadmeActivity extends AppCompatActivity {
 
         scrollView.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.INVISIBLE);
+        rvFiles.setVisibility(View.INVISIBLE);
     }
 
-    private void showResult() {
+    private void showReadme() {
         scrollView.setVisibility(View.VISIBLE);
 
         tvError.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.INVISIBLE);
+        rvFiles.setVisibility(View.INVISIBLE);
+    }
+
+    private void showFiles() {
+        rvFiles.setVisibility(View.VISIBLE);
+
+        scrollView.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
+        tvError.setVisibility(View.INVISIBLE);
     }
 }

@@ -29,6 +29,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_readme"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible" />
+
             <ProgressBar
                 android:id="@+id/pb_ReadmeProgressbar"
                 android:layout_width="match_parent"

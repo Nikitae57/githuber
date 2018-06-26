@@ -160,7 +160,8 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_log_in:
                         Intent loginIntent = new Intent(context, LoginActivity.class);
                         startActivityForResult(loginIntent, 1);
-                        break;
+                        hideKeyboard();
+                    break;
 
                     case R.id.action_log_out:
 
@@ -181,21 +182,22 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.remove("NOT_LOGIN_DATA");
                         editor.commit();
-                        break;
+
+                    break;
 
                     case R.id.action_view_starred:
 
                         URL starredUrl = NetworkUtil.makeUserStarredUrl(login);
                         new QueryAuthTask().execute(starredUrl);
 
-                        break;
+                    break;
 
                     case R.id.action_view_user_repos:
 
                         URL userReposUrl = NetworkUtil.makeUserReposUrl(login);
                         new QueryAuthTask().execute(userReposUrl);
 
-                        break;
+                    break;
                 }
                 return true;
             }

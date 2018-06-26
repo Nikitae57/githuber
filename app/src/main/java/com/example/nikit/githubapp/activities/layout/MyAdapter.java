@@ -64,6 +64,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         public MyViewHolder(View itemView) {
             super(itemView);
+
             fullName = itemView.findViewById(R.id.tvItem);
             starsCounter = itemView.findViewById(R.id.tvStars);
 
