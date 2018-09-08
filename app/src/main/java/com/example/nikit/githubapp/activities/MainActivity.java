@@ -4,17 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,8 +27,8 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.example.nikit.githubapp.activities.layout.MyAdapter;
 import com.example.nikit.githubapp.R;
+import com.example.nikit.githubapp.activities.layout.MyAdapter;
 import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
@@ -129,19 +127,19 @@ public class MainActivity extends AppCompatActivity {
 
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+            public void onDrawerSlide(View drawerView, float slideOffset) {
                 if (slideOffset != 0) {
                     hideKeyboard();
                 }
             }
 
             @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
+            public void onDrawerOpened(View drawerView) {
 
             }
 
             @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
+            public void onDrawerClosed(View drawerView) {
 
             }
 
@@ -153,8 +151,11 @@ public class MainActivity extends AppCompatActivity {
         loginNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            public boolean onNavigationItemSelected(MenuItem item) {
                 drawer.closeDrawers();
+
+                if (item.isChecked()) { return true; }
+                item.setCheckable(true);
 
                 switch (item.getItemId()) {
                     case R.id.action_log_in:
@@ -205,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            public boolean onNavigationItemSelected(MenuItem item) {
                 if (item.isChecked()) {
                     return true;
                 }
@@ -444,11 +445,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeUpData(String s) {
-
         tvSortFoundLangs.setVisibility(View.VISIBLE);
 
         try {
-
             JSONObject jsonRespond = new JSONObject(s);
             int numberOfItems = jsonRespond.getJSONArray("items").length();
             NUMBER_OF_ITEMS = numberOfItems > 100 ? 100 : numberOfItems;

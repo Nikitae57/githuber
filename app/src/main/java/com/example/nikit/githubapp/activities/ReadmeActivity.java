@@ -4,14 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -149,7 +148,7 @@ public class ReadmeActivity extends AppCompatActivity {
     private void setListeners() {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            public boolean onNavigationItemSelected(MenuItem item) {
 
                 if (item.isChecked()) {
                     return true;
@@ -158,22 +157,17 @@ public class ReadmeActivity extends AppCompatActivity {
 
                 switch (item.getItemId()) {
                     case R.id.action_show_repo_readme:
-
                         showReadme();
-
                     break;
 
                     case R.id.action_show_repo_file:
-
                         if (filesDownloaded) {
                             showFiles();
-
                         } else {
                             URL masterBranchUrl = NetworkUtil.makeMasterBranchURL(repoFullName);
                             new QueryMasterTreeShaTask().execute(masterBranchUrl);
                             showFiles();
                         }
-
                     break;
                 }
 
@@ -414,6 +408,7 @@ public class ReadmeActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            Log.d("TREE", treeStr);
             return treeStr;
         }
 
@@ -431,7 +426,15 @@ public class ReadmeActivity extends AppCompatActivity {
             }
 
             repoFilesArray = filesArray;
-            rvFiles.setAdapter(new RepoFilesAdapter(repoFilesArray));
+            final RepoFilesAdapter adapter = new RepoFilesAdapter(repoFilesArray);
+            adapter.setFilesClickedListener(new RepoFilesAdapter.FileClickedListener() {
+                @Override
+                public void fileClicked() {
+                    adapter.notifyDataSetChanged();
+                }
+            });
+
+            rvFiles.setAdapter(adapter);
             showFiles();
         }
     }

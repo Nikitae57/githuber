@@ -20,37 +20,35 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:background="#212121"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:titleTextColor="@android:color/white"/>
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginStart="5dp"
-            android:background="@drawable/rounded_corners"
+            android:layout_height="48dp"
+            android:background="@android:color/background_light"
             android:elevation="5dp"
             android:padding="5dp">
 
             <EditText
                 android:id="@+id/etQuery"
-                android:layout_width="303dp"
-                android:layout_height="36dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:hint="@string/hint"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btnSearch"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/btnSearch"
-                android:layout_width="0dp"
+                android:layout_width="42dp"
                 android:layout_height="0dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/search"

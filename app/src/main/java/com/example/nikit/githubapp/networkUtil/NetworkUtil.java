@@ -6,9 +6,6 @@ import android.util.Log;
 
 import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,7 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -170,7 +166,8 @@ public class NetworkUtil {
         Uri uri = Uri.parse(GITHUB_API_BASE_URL).buildUpon().
                 appendPath(REPOS).appendPath(ownerRepoSplit[0]).
                 appendPath(ownerRepoSplit[1]).appendPath(GIT).
-                appendPath(TREES).appendPath(sha).build();
+                appendPath(TREES).appendPath(sha).
+                appendQueryParameter("recursive", "1").build();
 
         URL url = null;
         try {

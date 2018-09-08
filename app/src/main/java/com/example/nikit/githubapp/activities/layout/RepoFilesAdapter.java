@@ -2,7 +2,6 @@ package com.example.nikit.githubapp.activities.layout;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,23 +9,33 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nikit.githubapp.R;
+import com.example.nikit.githubapp.filesUtil.Util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
 public class RepoFilesAdapter
         extends RecyclerView.Adapter<RepoFilesAdapter.RepoFilesViewHolder> {
 
     private int ITEM_COUNT;
-    private JSONArray filesJsonArray;
+    private JSONArray currentDirJsonArray, parentDirJsonArray, rootDirJsonArray;
+    private FileClickedListener fileClickedListener;
+    private boolean browsingRootDir = true;
+    private String parentPath = "";
 
-    public RepoFilesAdapter(JSONArray filesJsonArray) {
+    public RepoFilesAdapter(JSONArray currentDirJsonArray) {
+        this.currentDirJsonArray = currentDirJsonArray;
+        rootDirJsonArray = currentDirJsonArray;
+        parentDirJsonArray = rootDirJsonArray;
+        ITEM_COUNT = currentDirJsonArray.length();
+    }
 
-        this.filesJsonArray = filesJsonArray;
-        ITEM_COUNT = filesJsonArray.length();
-        Log.d("FILES", "count " + ITEM_COUNT);
-        Log.d("FILES", filesJsonArray.toString());
+    public void setFilesClickedListener(FileClickedListener listener) {
+        this.fileClickedListener = listener;
     }
 
     @NonNull
@@ -36,8 +45,6 @@ public class RepoFilesAdapter
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view = layoutInflater.
                 inflate(R.layout.readme_activity_rv_list_item, parent, false);
-
-        Log.d("HOLDER", "holder created");
 
         return new RepoFilesViewHolder(view);
     }
@@ -50,27 +57,42 @@ public class RepoFilesAdapter
     @Override
     public int getItemCount() { return ITEM_COUNT; }
 
-    class RepoFilesViewHolder extends RecyclerView.ViewHolder {
+    public interface FileClickedListener {
+        void fileClicked();
+    }
 
-        private TextView tvFileName;
+    class RepoFilesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        private TextView tvFileName, tvFileSize;
         private ImageView fileImg;
 
-        public RepoFilesViewHolder(View itemView) {
+        RepoFilesViewHolder(View itemView) {
             super(itemView);
 
             tvFileName = itemView.findViewById(R.id.readme_file_name);
+            tvFileSize = itemView.findViewById(R.id.readme_tv_size);
             fileImg = itemView.findViewById(R.id.readme_iv_file_type);
+
+            itemView.setOnClickListener(this);
         }
 
-        int fileSize;
-        String fileNameStr, fileType;
+        double fileSize;
+        String fileNameStr, fileType, fileSizeStr;
         JSONObject fileJSON;
-        public void bind(int position) {
+        void bind(int position) {
+
+            DecimalFormat df = new DecimalFormat("#.##");
+            df.setRoundingMode(RoundingMode.CEILING);
 
             try {
+                fileJSON = currentDirJsonArray.getJSONObject(position);
 
-                fileJSON = filesJsonArray.getJSONObject(position);
-                fileNameStr = fileJSON.getString("path");
+                if (browsingRootDir) {
+                    fileNameStr = fileJSON.getString("path");
+                } else {
+                    fileNameStr = Util.childSimpleName(parentPath, fileJSON.getString("path"));
+                }
+
                 tvFileName.setText(fileNameStr);
 
                 fileType = fileJSON.getString("type");
@@ -78,17 +100,61 @@ public class RepoFilesAdapter
                     fileImg.setImageResource(R.drawable.ic_folder_black_24dp);
 
                 } else {
+                    fileSize = fileJSON.getDouble("size");
+                    if (fileSize > (1 << 30)) {
+                        fileSize /= (1 << 30);
+                        fileSizeStr = "Gb";
 
-                    fileSize = fileJSON.getInt("size");
+                    } else if (fileSize > (1 << 20)) {
+                        fileSize /= (1 << 20);
+                        fileSizeStr = "Mb";
 
-                    
+                    } else if (fileSize > (1 << 10)) {
+                        fileSize /= (1 << 10);
+                        fileSizeStr = "Kb";
 
+                    } else {
+                        fileSizeStr = "B";
+                    }
+
+                    fileSizeStr = df.format(fileSize) + fileSizeStr;
+                    tvFileSize.setText(fileSizeStr);
                     fileImg.setImageResource(R.drawable.ic_insert_drive_file_black_24dp);
                 }
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+
+        @Override
+        public void onClick(View view) {
+
+            String clickedFilePath;
+            try {
+                clickedFilePath = fileJSON.getString("path");
+                JSONArray children = new JSONArray();
+
+                for (int i = 0; i < currentDirJsonArray.length(); i++) {
+                    JSONObject possibleChild = rootDirJsonArray.getJSONObject(i);
+                    String possibleChildPath = possibleChild.getString("path");
+
+                    if (Util.isChild(clickedFilePath, possibleChildPath)) {
+                        children.put(possibleChild);
+                    }
+                }
+
+                if (clickedFilePath != null) {
+                    parentPath = clickedFilePath;
+                }
+                parentDirJsonArray = currentDirJsonArray;
+                currentDirJsonArray = children;
+
+                ITEM_COUNT = children.length();
+                browsingRootDir = false;
+                fileClickedListener.fileClicked();
+
+            } catch (JSONException jsonEx) { jsonEx.printStackTrace(); }
         }
     }
 
