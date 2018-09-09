@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.nikit.githubapp.R;
-import com.example.nikit.githubapp.filesUtil.Util;
+import com.example.nikit.githubapp.files_util.Util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
