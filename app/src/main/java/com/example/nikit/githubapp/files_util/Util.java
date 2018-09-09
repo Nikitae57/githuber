@@ -1,5 +1,9 @@
 package com.example.nikit.githubapp.files_util;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Util {
     public static boolean isChild(String parent, String child) {
         return child.startsWith(parent)
@@ -26,5 +30,40 @@ public class Util {
         }
 
         return counter;
+    }
+
+    public static JSONArray makeChildCollection(JSONArray parentJson, String childPath) {
+
+        JSONArray children = null;
+        try {
+
+            children = new JSONArray();
+            for (int i = 0; i < parentJson.length(); i++) {
+                JSONObject possibleChild = parentJson.getJSONObject(i);
+                String possibleChildPath = possibleChild.getString("path");
+
+                if (Util.isChild(childPath, possibleChildPath)) {
+                    children.put(possibleChild);
+                }
+            }
+
+        } catch (JSONException jsonEx) { jsonEx.printStackTrace(); }
+
+        return children;
+    }
+
+    public static JSONArray makeRootDirCollection(JSONArray allFiles) {
+        JSONArray root = new JSONArray();
+
+        try {
+            for (int i = 0; i < allFiles.length(); i++) {
+                JSONObject possibleChild = allFiles.getJSONObject(i);
+                if (countSlashes(possibleChild.getString("path")) == 0) {
+                    root.put(possibleChild);
+                }
+            }
+        } catch (JSONException jsonEx) { jsonEx.printStackTrace(); }
+
+        return root;
     }
 }

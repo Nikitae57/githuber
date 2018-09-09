@@ -22,15 +22,17 @@ public class RepoFilesAdapter
         extends RecyclerView.Adapter<RepoFilesAdapter.RepoFilesViewHolder> {
 
     private int ITEM_COUNT;
-    private JSONArray currentDirJsonArray, parentDirJsonArray, rootDirJsonArray;
+    private JSONArray currentDirJsonArray, parentDirJsonArray, allFilesJsonArray, rootDirJsonArray;
     private FileClickedListener fileClickedListener;
     private boolean browsingRootDir = true;
     private String parentPath = "";
 
-    public RepoFilesAdapter(JSONArray currentDirJsonArray) {
-        this.currentDirJsonArray = currentDirJsonArray;
-        rootDirJsonArray = currentDirJsonArray;
-        parentDirJsonArray = rootDirJsonArray;
+    public RepoFilesAdapter(JSONArray allFilesJsonArray) {
+        this.allFilesJsonArray = allFilesJsonArray;
+
+        rootDirJsonArray = Util.makeRootDirCollection(allFilesJsonArray);
+        currentDirJsonArray = rootDirJsonArray;
+        parentDirJsonArray = currentDirJsonArray;
         ITEM_COUNT = currentDirJsonArray.length();
     }
 
@@ -98,6 +100,7 @@ public class RepoFilesAdapter
                 fileType = fileJSON.getString("type");
                 if (fileType.equals("tree")) {
                     fileImg.setImageResource(R.drawable.ic_folder_black_24dp);
+                    tvFileSize.setVisibility(View.INVISIBLE);
 
                 } else {
                     fileSize = fileJSON.getDouble("size");
@@ -119,6 +122,7 @@ public class RepoFilesAdapter
 
                     fileSizeStr = df.format(fileSize) + fileSizeStr;
                     tvFileSize.setText(fileSizeStr);
+                    tvFileSize.setVisibility(View.VISIBLE);
                     fileImg.setImageResource(R.drawable.ic_insert_drive_file_black_24dp);
                 }
 
@@ -130,31 +134,22 @@ public class RepoFilesAdapter
         @Override
         public void onClick(View view) {
 
-            String clickedFilePath;
+            String clickedFilePath = null;
             try {
                 clickedFilePath = fileJSON.getString("path");
-                JSONArray children = new JSONArray();
-
-                for (int i = 0; i < currentDirJsonArray.length(); i++) {
-                    JSONObject possibleChild = rootDirJsonArray.getJSONObject(i);
-                    String possibleChildPath = possibleChild.getString("path");
-
-                    if (Util.isChild(clickedFilePath, possibleChildPath)) {
-                        children.put(possibleChild);
-                    }
-                }
-
-                if (clickedFilePath != null) {
-                    parentPath = clickedFilePath;
-                }
-                parentDirJsonArray = currentDirJsonArray;
-                currentDirJsonArray = children;
-
-                ITEM_COUNT = children.length();
-                browsingRootDir = false;
-                fileClickedListener.fileClicked();
-
             } catch (JSONException jsonEx) { jsonEx.printStackTrace(); }
+
+            JSONArray children = Util.makeChildCollection(allFilesJsonArray, clickedFilePath);
+
+            if (clickedFilePath != null) {
+                parentPath = clickedFilePath;
+            }
+            parentDirJsonArray = currentDirJsonArray;
+            currentDirJsonArray = children;
+
+            ITEM_COUNT = children.length();
+            browsingRootDir = false;
+            fileClickedListener.fileClicked();
         }
     }
 
