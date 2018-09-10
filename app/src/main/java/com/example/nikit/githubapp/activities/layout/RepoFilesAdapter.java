@@ -22,9 +22,11 @@ public class RepoFilesAdapter
         extends RecyclerView.Adapter<RepoFilesAdapter.RepoFilesViewHolder> {
 
     private int ITEM_COUNT;
+    private final int TYPE_HEADER = 0;
+    private final int TYPE_ITEM = 1;
     private JSONArray currentDirJsonArray, parentDirJsonArray, allFilesJsonArray, rootDirJsonArray;
     private FileClickedListener fileClickedListener;
-    private boolean browsingRootDir = true;
+    public static boolean browsingRootDir = true;
     private String parentPath = "";
 
     public RepoFilesAdapter(JSONArray allFilesJsonArray) {
@@ -34,6 +36,7 @@ public class RepoFilesAdapter
         currentDirJsonArray = rootDirJsonArray;
         parentDirJsonArray = currentDirJsonArray;
         ITEM_COUNT = currentDirJsonArray.length();
+
     }
 
     public void setFilesClickedListener(FileClickedListener listener) {
@@ -45,8 +48,14 @@ public class RepoFilesAdapter
     public RepoFilesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View view = layoutInflater.
-                inflate(R.layout.readme_activity_rv_list_item, parent, false);
+        View view;
+        if (viewType == TYPE_ITEM) {
+            view = layoutInflater.
+                    inflate(R.layout.readme_activity_rv_list_item, parent, false);
+        } else {
+            view = layoutInflater
+                    .inflate(R.layout.readme_activity_rv_back_home_view, parent, false);
+        }
 
         return new RepoFilesViewHolder(view);
     }
@@ -57,10 +66,24 @@ public class RepoFilesAdapter
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return position == 0 ? TYPE_HEADER : TYPE_ITEM;
+    }
+
+    @Override
     public int getItemCount() { return ITEM_COUNT; }
 
     public interface FileClickedListener {
         void fileClicked();
+    }
+
+    class RepoHomeBackViewHolder extends RecyclerView.ViewHolder {
+
+        public RepoHomeBackViewHolder(View itemView) {
+            super(itemView);
+
+            // TODO make viewholder
+        }
     }
 
     class RepoFilesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
