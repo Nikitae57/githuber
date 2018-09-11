@@ -48,6 +48,19 @@ public class RepoFilesAdapter
         browsingRootDir = true;
     }
 
+    public void backPressed() {
+        int lastIndex = parentPath.lastIndexOf('/');
+        if (lastIndex == -1) {
+            homePressed();
+            return;
+        }
+
+        currentDirJsonArray = parentDirJsonArray;
+        parentPath = parentPath.substring(0, parentPath.lastIndexOf('/'));
+        parentDirJsonArray = Util.makeChildCollection(allFilesJsonArray, parentPath);
+        ITEM_COUNT = currentDirJsonArray.length();
+    }
+
     @NonNull
     @Override
     public RepoFilesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -69,9 +82,7 @@ public class RepoFilesAdapter
     @Override
     public int getItemCount() { return ITEM_COUNT; }
 
-    public interface FileClickedListener {
-        void fileClicked();
-    }
+    public interface FileClickedListener { void fileClicked(); }
 
     class RepoFilesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 

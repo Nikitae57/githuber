@@ -70,4 +70,14 @@ public class Util {
     public static boolean isFile(String path) {
         return path.matches("\\S+\\.(\\w)+");
     }
+
+    public static JSONArray makeParentCollection(String currentPath, JSONArray allFiles) {
+        String parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+        return makeChildCollection(allFiles, parentPath);
+    }
+
+    public static void main(String[] args) {
+        String path = ".idea/folder1/folder2";
+        System.out.println(path.substring(0, path.lastIndexOf('/')));
+    }
 }

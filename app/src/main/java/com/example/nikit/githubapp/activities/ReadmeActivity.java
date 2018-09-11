@@ -192,7 +192,9 @@ public class ReadmeActivity extends AppCompatActivity {
         llHomeBack.findViewById(R.id.readme_tv_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO make back btn listener
+                adapter.backPressed();
+                adapter.notifyDataSetChanged();
+                // TODO hide home and back btn if backed to the root folder
             }
         });
     }
