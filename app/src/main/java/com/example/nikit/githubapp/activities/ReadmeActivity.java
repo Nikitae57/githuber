@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -49,6 +50,7 @@ public class ReadmeActivity extends AppCompatActivity {
     private View headerView;
     private RecyclerView rvFiles;
     private RecyclerView.LayoutManager layoutManager;
+    private LinearLayout llHomeBack;
 
     private int idShare, idOpenRepo, idStarRepo;
     private Context context;
@@ -62,6 +64,7 @@ public class ReadmeActivity extends AppCompatActivity {
     private boolean repoIsChecked;
     private int respondCode;
     private boolean filesDownloaded;
+    private RepoFilesAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +100,7 @@ public class ReadmeActivity extends AppCompatActivity {
         tvError = findViewById(R.id.tv_ReadmeError);
         scrollView = findViewById(R.id.sv_readmeScrollView);
         rvFiles = findViewById(R.id.rv_readme);
+        llHomeBack = findViewById(R.id.readme_ll_home_back);
 
         navView = findViewById(R.id.nv_readme_repo_content);
         headerView = navView.getHeaderView(0);
@@ -149,6 +153,7 @@ public class ReadmeActivity extends AppCompatActivity {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
+                drawer.closeDrawers();
 
                 if (item.isChecked()) {
                     return true;
@@ -172,6 +177,22 @@ public class ReadmeActivity extends AppCompatActivity {
                 }
 
                 return true;
+            }
+        });
+
+        llHomeBack.findViewById(R.id.readme_fl_home).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                adapter.homePressed();
+                adapter.notifyDataSetChanged();
+                llHomeBack.setVisibility(View.GONE);
+            }
+        });
+
+        llHomeBack.findViewById(R.id.readme_tv_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO make back btn listener
             }
         });
     }
@@ -426,11 +447,12 @@ public class ReadmeActivity extends AppCompatActivity {
             }
 
             repoFilesArray = filesArray;
-            final RepoFilesAdapter adapter = new RepoFilesAdapter(repoFilesArray);
+            adapter = new RepoFilesAdapter(repoFilesArray);
             adapter.setFilesClickedListener(new RepoFilesAdapter.FileClickedListener() {
                 @Override
                 public void fileClicked() {
                     adapter.notifyDataSetChanged();
+                    llHomeBack.setVisibility(View.VISIBLE);
                 }
             });
 

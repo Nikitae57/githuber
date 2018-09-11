@@ -34,6 +34,13 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
+                <include
+                    android:id="@+id/readme_ll_home_back"
+                    layout="@layout/readme_activity_rv_back_home_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rv_readme"
                     android:layout_width="match_parent"

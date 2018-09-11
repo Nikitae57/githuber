@@ -66,4 +66,8 @@ public class Util {
 
         return root;
     }
+
+    public static boolean isFile(String path) {
+        return path.matches("\\S+\\.(\\w)+");
+    }
 }

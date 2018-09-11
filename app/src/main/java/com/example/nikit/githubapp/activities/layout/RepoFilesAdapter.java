@@ -22,8 +22,6 @@ public class RepoFilesAdapter
         extends RecyclerView.Adapter<RepoFilesAdapter.RepoFilesViewHolder> {
 
     private int ITEM_COUNT;
-    private final int TYPE_HEADER = 0;
-    private final int TYPE_ITEM = 1;
     private JSONArray currentDirJsonArray, parentDirJsonArray, allFilesJsonArray, rootDirJsonArray;
     private FileClickedListener fileClickedListener;
     public static boolean browsingRootDir = true;
@@ -36,11 +34,18 @@ public class RepoFilesAdapter
         currentDirJsonArray = rootDirJsonArray;
         parentDirJsonArray = currentDirJsonArray;
         ITEM_COUNT = currentDirJsonArray.length();
-
     }
 
     public void setFilesClickedListener(FileClickedListener listener) {
         this.fileClickedListener = listener;
+    }
+
+    public void homePressed() {
+        currentDirJsonArray = rootDirJsonArray;
+        parentDirJsonArray = rootDirJsonArray;
+        parentPath = "";
+        ITEM_COUNT = currentDirJsonArray.length();
+        browsingRootDir = true;
     }
 
     @NonNull
@@ -49,13 +54,9 @@ public class RepoFilesAdapter
 
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view;
-        if (viewType == TYPE_ITEM) {
-            view = layoutInflater.
-                    inflate(R.layout.readme_activity_rv_list_item, parent, false);
-        } else {
-            view = layoutInflater
-                    .inflate(R.layout.readme_activity_rv_back_home_view, parent, false);
-        }
+
+        view = layoutInflater.
+                inflate(R.layout.readme_activity_rv_list_item, parent, false);
 
         return new RepoFilesViewHolder(view);
     }
@@ -66,24 +67,10 @@ public class RepoFilesAdapter
     }
 
     @Override
-    public int getItemViewType(int position) {
-        return position == 0 ? TYPE_HEADER : TYPE_ITEM;
-    }
-
-    @Override
     public int getItemCount() { return ITEM_COUNT; }
 
     public interface FileClickedListener {
         void fileClicked();
-    }
-
-    class RepoHomeBackViewHolder extends RecyclerView.ViewHolder {
-
-        public RepoHomeBackViewHolder(View itemView) {
-            super(itemView);
-
-            // TODO make viewholder
-        }
     }
 
     class RepoFilesViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -160,6 +147,7 @@ public class RepoFilesAdapter
             String clickedFilePath = null;
             try {
                 clickedFilePath = fileJSON.getString("path");
+                if (Util.isFile(clickedFilePath)) { return; }
             } catch (JSONException jsonEx) { jsonEx.printStackTrace(); }
 
             JSONArray children = Util.makeChildCollection(allFilesJsonArray, clickedFilePath);
