@@ -3,6 +3,8 @@ package com.example.nikit.githubapp.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -13,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +25,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -36,7 +40,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private int NUMBER_OF_ITEMS;
     private Set<String> languageSet;
     private int checkLanguageSelection = 0;
-    private boolean reposAreSorted = false;
+    private boolean reposAreSorted = false,
+            userAvatarStored = false;
 
     public static Context context;
     public static String login, password;
@@ -60,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREF_UNAME = "Username";
     private static final String PREF_PASSWORD = "Password";
     private static final String PREF_USER_JSON = "UserJSON";
+    private static final String PREF_AVATAR_IN_STORAGE = "avatar_in_storage";
 
     private RecyclerView recyclerView;
     private EditText searchField;
@@ -72,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private View headerView, loginHeaderView;
     private TextView tvSelectedLang;
     private LinearLayout llSelectedLang;
+    private ImageView imgUserAvatar;
 
     private NetworkUtil.SORT_BY sortBy;
 
@@ -113,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
         loginHeaderView = loginNavView.getHeaderView(0);
         tvUserLogin = loginHeaderView.findViewById(R.id.tv_user_login);
         tvUserMail = loginHeaderView.findViewById(R.id.tv_user_mail);
+        imgUserAvatar = loginHeaderView.findViewById(R.id.img_user_avatar);
 
         navView = findViewById(R.id.nv_main);
         headerView = navView.getHeaderView(0);
@@ -325,21 +338,20 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
 
-        // Save value
         editor.putString(PREF_UNAME, login);
         editor.putString(PREF_PASSWORD, password);
         editor.putString(PREF_USER_JSON, jsonStr);
+        editor.putBoolean(PREF_AVATAR_IN_STORAGE, userAvatarStored);
         editor.commit();
     }
 
     private void loadPreferences() {
-
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        // Get value
         login = settings.getString(PREF_UNAME, null);
         password = settings.getString(PREF_PASSWORD, null);
         jsonStr = settings.getString(PREF_USER_JSON, null);
+        userAvatarStored = settings.getBoolean(PREF_AVATAR_IN_STORAGE, false);
 
         if (login != null && password != null && jsonStr != null) {
             inflateLoggedInMenu();
@@ -356,9 +368,16 @@ public class MainActivity extends AppCompatActivity {
         String userMail = null;
         try {
             jsonUser = new JSONObject(jsonStr);
+            String avatarUrl = jsonUser.getString("avatar_url");
+            if (userAvatarStored) {
+                getAvatarFromStorage();
+            } else {
+                new QueryAvatarTask(imgUserAvatar).execute(new URL(avatarUrl));
+            }
+
             userMail = jsonUser.getString("email");
 
-        } catch (JSONException e) {
+        } catch (JSONException | MalformedURLException e) {
             e.printStackTrace();
         }
 
@@ -369,9 +388,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void getAvatarFromStorage() {
+        File avatarFile = new File(context.getCacheDir(), "avatar");
+        Bitmap avatarBitmap = BitmapFactory.decodeFile(avatarFile.getPath());
+        imgUserAvatar.setImageBitmap(avatarBitmap);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         hideKeyboard();
 
         if (resultCode == RESULT_OK) {
@@ -618,6 +642,51 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 showError();
             }
+        }
+    }
+
+    class QueryAvatarTask extends AsyncTask<URL, Void, Bitmap> {
+        ImageView userAvatar;
+
+        QueryAvatarTask(ImageView avatarView) {
+            this.userAvatar = avatarView;
+        }
+
+        @Override
+        protected Bitmap doInBackground(URL... urls) {
+            Bitmap avatarBitmap = null;
+            try {
+                InputStream in = urls[0].openStream();
+                avatarBitmap = BitmapFactory.decodeStream(in);
+
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return avatarBitmap;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            userAvatar.setImageBitmap(bitmap);
+
+            try {
+                File f = new File(context.getCacheDir(), "avatar");
+                f.createNewFile();
+
+                //Convert bitmap to byte array
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 0 , bos);
+                byte[] bitmapdata = bos.toByteArray();
+
+                //write the bytes in file
+                FileOutputStream fos = new FileOutputStream(f);
+                fos.write(bitmapdata);
+                fos.flush();
+                fos.close();
+
+                userAvatarStored = true;
+            } catch (IOException ioex) { ioex.printStackTrace(); }
         }
     }
 }

@@ -3,8 +3,8 @@ package com.example.nikit.githubapp.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -53,13 +53,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showProgressBar() {
-
         tvWrong.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
     }
 
     private void showError() {
-
         progressBar.setVisibility(View.INVISIBLE);
         tvWrong.setVisibility(View.VISIBLE);
     }
