@@ -194,7 +194,9 @@ public class ReadmeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 adapter.backPressed();
                 adapter.notifyDataSetChanged();
-                // TODO hide home and back btn if backed to the root folder
+                if (RepoFilesAdapter.browsingRootDir) {
+                    llHomeBack.setVisibility(View.GONE);
+                }
             }
         });
     }
