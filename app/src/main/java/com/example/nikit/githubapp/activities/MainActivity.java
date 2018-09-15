@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private View headerView, loginHeaderView;
     private TextView tvSelectedLang;
     private LinearLayout llSelectedLang;
-    private ImageView imgUserAvatar;
+    private ImageView imgUserAvatar, imgError;
 
     private NetworkUtil.SORT_BY sortBy;
 
@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setToolbarAndActionBar() {
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -119,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         recyclerView = findViewById(R.id.rvListItems);
         tvError = findViewById(R.id.tvError);
+        imgError = findViewById(R.id.main_img_error);
 
         drawer = findViewById(R.id.drawer_layout);
         loginNavView = findViewById(R.id.nv_main_login);
@@ -178,39 +178,37 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                     case R.id.action_log_out:
-
                         login = null;
                         password = null;
                         userIsLoggedIn = false;
                         jsonUser = null;
+                        userAvatarStored = false;
+                        imgUserAvatar.setImageResource(R.drawable.ic_default_avatar);
 
                         tvUserLogin.setText(R.string.github_login);
                         tvUserMail.setText(R.string.email);
 
-                        loginNavView.inflateMenu(R.menu.main_activity_logged_out);
+                        loginNavView.getMenu().findItem(R.id.action_log_in).setVisible(true);
                         Menu menu = loginNavView.getMenu();
                         menu.setGroupVisible(R.id.group_log_out, false);
                         menu.setGroupVisible(R.id.group_view_user_favorites, false);
 
                         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
                         SharedPreferences.Editor editor = preferences.edit();
-                        editor.remove("NOT_LOGIN_DATA");
+                        editor.clear();
                         editor.commit();
 
+                        context.deleteFile("avatar");
                     break;
 
                     case R.id.action_view_starred:
-
                         URL starredUrl = NetworkUtil.makeUserStarredUrl(login);
                         new QueryAuthTask().execute(starredUrl);
-
                     break;
 
                     case R.id.action_view_user_repos:
-
                         URL userReposUrl = NetworkUtil.makeUserReposUrl(login);
                         new QueryAuthTask().execute(userReposUrl);
-
                     break;
                 }
                 return true;
@@ -362,7 +360,9 @@ public class MainActivity extends AppCompatActivity {
     private void inflateLoggedInMenu() {
 
         loginNavView.getMenu().findItem(R.id.action_log_in).setVisible(false);
+
         loginNavView.inflateMenu(R.menu.main_activity_logged_in);
+        loginNavView.invalidate();
         tvUserLogin.setText(login);
 
         String userMail = null;
@@ -389,7 +389,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getAvatarFromStorage() {
-        File avatarFile = new File(context.getCacheDir(), "avatar");
+        File avatarFile = new File(context.getFilesDir(), "avatar");
         Bitmap avatarBitmap = BitmapFactory.decodeFile(avatarFile.getPath());
         imgUserAvatar.setImageBitmap(avatarBitmap);
     }
@@ -399,7 +399,6 @@ public class MainActivity extends AppCompatActivity {
         hideKeyboard();
 
         if (resultCode == RESULT_OK) {
-
             login = data.getStringExtra("login");
             password = data.getStringExtra("password");
             jsonStr = data.getStringExtra("json");
@@ -600,6 +599,7 @@ public class MainActivity extends AppCompatActivity {
 
             recyclerView.setVisibility(View.INVISIBLE);
             tvError.setVisibility(View.INVISIBLE);
+            imgError.setVisibility(View.INVISIBLE);
         }
 
         protected void showResult() {
@@ -607,10 +607,12 @@ public class MainActivity extends AppCompatActivity {
 
             progressBar.setVisibility(View.INVISIBLE);
             tvError.setVisibility(View.INVISIBLE);
+            imgError.setVisibility(View.INVISIBLE);
         }
 
         protected void showError() {
             tvError.setVisibility(View.VISIBLE);
+            imgError.setVisibility(View.VISIBLE);
 
             recyclerView.setVisibility(View.INVISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
@@ -660,7 +662,6 @@ public class MainActivity extends AppCompatActivity {
                 avatarBitmap = BitmapFactory.decodeStream(in);
 
             } catch (Exception e) {
-                Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
             return avatarBitmap;
@@ -671,7 +672,7 @@ public class MainActivity extends AppCompatActivity {
             userAvatar.setImageBitmap(bitmap);
 
             try {
-                File f = new File(context.getCacheDir(), "avatar");
+                File f = new File(context.getFilesDir(), "avatar");
                 f.createNewFile();
 
                 //Convert bitmap to byte array
@@ -686,6 +687,7 @@ public class MainActivity extends AppCompatActivity {
                 fos.close();
 
                 userAvatarStored = true;
+                Log.d("AVATAR", "CHANGED");
             } catch (IOException ioex) { ioex.printStackTrace(); }
         }
     }

@@ -63,7 +63,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:background="@android:color/transparent">
 
             <android.support.v7.widget.RecyclerView
@@ -80,11 +80,21 @@
                 android:layout_height="wrap_content"
                 android:visibility="invisible" />
 
+
+            <ImageView
+                android:id="@+id/main_img_error"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/ic_error_outline_black_24dp" />
+
             <TextView
                 android:id="@+id/tvError"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginBottom="50dp"
                 android:text="@string/error"
                 android:textSize="24sp"
                 android:visibility="invisible" />

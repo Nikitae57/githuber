@@ -14,6 +14,9 @@ import com.example.nikit.githubapp.R;
 import com.example.nikit.githubapp.enums.REQUEST_METHOD;
 import com.example.nikit.githubapp.networkUtil.NetworkUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.URL;
 
@@ -98,6 +101,11 @@ public class LoginActivity extends AppCompatActivity {
                 showError();
                 return;
             }
+
+            try {
+                JSONObject respondJson = new JSONObject(respond);
+                login = respondJson.getString("login");
+            } catch (JSONException e) { e.printStackTrace(); }
 
             Intent intent = new Intent();
             intent.putExtra("login", login);

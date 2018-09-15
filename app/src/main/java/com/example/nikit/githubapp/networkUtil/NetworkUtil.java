@@ -197,7 +197,6 @@ public class NetworkUtil {
         try {
             url = new URL(GITHUB_API_BASE_URL + "/user/starred/" + repoFullName);
             String u = url.toString();
-            Log.d("url", u);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
