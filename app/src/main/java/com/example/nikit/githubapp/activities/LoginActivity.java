@@ -2,13 +2,15 @@ package com.example.nikit.githubapp.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.example.nikit.githubapp.R;
 import com.example.nikit.githubapp.enums.REQUEST_METHOD;
@@ -23,10 +25,13 @@ import java.net.URL;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etLogin, etPassword;
-    private TextView tvWrong;
+    private View background, loginFormFog;
     private ProgressBar progressBar;
+    private ColorDrawable backgroundColors[];
+    private TransitionDrawable colorTransition;
 
     private String login, password;
+    private boolean errorOccured = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +40,17 @@ public class LoginActivity extends AppCompatActivity {
 
         etLogin = findViewById(R.id.et_login_or_email);
         etPassword = findViewById(R.id.et_password);
-        tvWrong = findViewById(R.id.tv_wrong_login_or_password);
         progressBar = findViewById(R.id.login_progress_bar);
+        loginFormFog = findViewById(R.id.login_auth_fog);
+
+        background = findViewById(R.id.login_background);
+        backgroundColors = new ColorDrawable[]{
+                new ColorDrawable(Color.WHITE),
+                new ColorDrawable(Color.parseColor("#ff5252"))
+        };
+        colorTransition = new TransitionDrawable(backgroundColors);
+        background.setBackground(colorTransition);
+
     }
 
     public void login(View view) {
@@ -56,13 +70,18 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showProgressBar() {
-        tvWrong.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
+        loginFormFog.setVisibility(View.VISIBLE);
+        if (errorOccured) {
+            colorTransition.reverseTransition(500);
+        }
     }
 
     private void showError() {
         progressBar.setVisibility(View.INVISIBLE);
-        tvWrong.setVisibility(View.VISIBLE);
+        loginFormFog.setVisibility(View.GONE);
+        colorTransition.startTransition(500);
+        errorOccured = true;
     }
 
     class AuthTask extends AsyncTask<URL, Void, String> {
