@@ -34,7 +34,7 @@ public class NetworkUtil {
 
     private static String sortBy;
 
-    final static String README_BASE_URL = "https://api.github.com/repos";
+    private final static String README_BASE_URL = "https://api.github.com/repos";
 
     public static URL makeUserUrl() {
 
@@ -196,7 +196,6 @@ public class NetworkUtil {
         URL url = null;
         try {
             url = new URL(GITHUB_API_BASE_URL + "/user/starred/" + repoFullName);
-            String u = url.toString();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -342,13 +341,9 @@ public class NetworkUtil {
 
         URL url = null;
         try {
-            StringBuilder urlStr = new StringBuilder(README_BASE_URL);
-            urlStr.append("/").append(fullName).append("/readme");
-            url = new URL(urlStr.toString());
+            url = new URL(README_BASE_URL + "/" + fullName + "/readme");
 
-        } catch (MalformedURLException ex) {
-            ex.printStackTrace();
-        }
+        } catch (MalformedURLException ex) { ex.printStackTrace(); }
 
         return url;
     }

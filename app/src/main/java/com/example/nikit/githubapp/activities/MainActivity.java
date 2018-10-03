@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean reposAreSorted = false,
             userAvatarStored = false;
 
-    public static Context context;
+    public Context context;
     public static String login, password;
     public static JSONObject jsonUser;
     private String jsonStr;
@@ -80,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
             tvUserMail, tvSortFoundLangs;
     private DrawerLayout drawer;
     private NavigationView navView, loginNavView;
-    private View headerView, loginHeaderView;
     private TextView tvSelectedLang;
     private LinearLayout llSelectedLang;
     private ImageView imgUserAvatar, imgError;
@@ -108,8 +108,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        }
     }
 
     private void findViews() {
@@ -122,13 +124,13 @@ public class MainActivity extends AppCompatActivity {
 
         drawer = findViewById(R.id.drawer_layout);
         loginNavView = findViewById(R.id.nv_main_login);
-        loginHeaderView = loginNavView.getHeaderView(0);
+        View loginHeaderView = loginNavView.getHeaderView(0);
         tvUserLogin = loginHeaderView.findViewById(R.id.tv_user_login);
         tvUserMail = loginHeaderView.findViewById(R.id.tv_user_mail);
         imgUserAvatar = loginHeaderView.findViewById(R.id.img_user_avatar);
 
         navView = findViewById(R.id.nv_main);
-        headerView = navView.getHeaderView(0);
+        View headerView = navView.getHeaderView(0);
         tvSelectedLang = headerView.findViewById(R.id.tv_selected_sort_lang);
         llSelectedLang = headerView.findViewById(R.id.llSelectedLang);
         tvSortFoundLangs = headerView.findViewById(R.id.tvSortFoundLangs);
@@ -140,19 +142,19 @@ public class MainActivity extends AppCompatActivity {
 
         drawer.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
                 if (slideOffset != 0) {
                     hideKeyboard();
                 }
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
 
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
 
             }
 
@@ -164,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         loginNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
             @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 drawer.closeDrawers();
 
                 if (item.isChecked()) { return true; }
@@ -196,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.clear();
-                        editor.commit();
+                        editor.apply();
 
                         context.deleteFile("avatar");
                     break;
@@ -217,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
             @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.isChecked()) {
                     return true;
                 }
@@ -257,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray sortedJsonArray = new JSONArray();
                 try {
                     String selectedLanguage = (String) spinnerSortByLang.getSelectedItem();
-                    if (selectedLanguage.equals("") || selectedLanguage == null) { return; }
+                    if (selectedLanguage.equals("")) { return; }
 
                     if (spinnerSortByLang.getSelectedItemPosition() == 0) {
                         reposAreSorted = false;
@@ -340,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putString(PREF_PASSWORD, password);
         editor.putString(PREF_USER_JSON, jsonStr);
         editor.putBoolean(PREF_AVATAR_IN_STORAGE, userAvatarStored);
-        editor.commit();
+        editor.apply();
     }
 
     private void loadPreferences() {
@@ -442,9 +444,7 @@ public class MainActivity extends AppCompatActivity {
                 languageSet.add(jsonObject.getString("language"));
             }
 
-            if (languageSet.contains("null")) {
-                languageSet.remove("null");
-            }
+            languageSet.remove("null");
 
             String languages[] = new String[languageSet.size() + 1];
             languages[0] = "Все";
@@ -491,9 +491,7 @@ public class MainActivity extends AppCompatActivity {
                     languageSet.add(jsonObject.getString("language"));
                 }
 
-                if (languageSet.contains("null")) {
-                    languageSet.remove("null");
-                }
+                languageSet.remove("null");
 
                 String languages[] = new String[languageSet.size() + 1];
                 languages[0] = "Все";
@@ -538,7 +536,9 @@ public class MainActivity extends AppCompatActivity {
         View view = this.getCurrentFocus();
         if (view != null) {
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
         }
     }
 
@@ -594,7 +594,7 @@ public class MainActivity extends AppCompatActivity {
 
     class QueryTask extends AsyncTask<URL, Void, String> {
 
-        protected void showProgressBar() {
+        void showProgressBar() {
             progressBar.setVisibility(View.VISIBLE);
 
             recyclerView.setVisibility(View.INVISIBLE);
@@ -602,7 +602,7 @@ public class MainActivity extends AppCompatActivity {
             imgError.setVisibility(View.INVISIBLE);
         }
 
-        protected void showResult() {
+        void showResult() {
             recyclerView.setVisibility(View.VISIBLE);
 
             progressBar.setVisibility(View.INVISIBLE);
@@ -610,7 +610,7 @@ public class MainActivity extends AppCompatActivity {
             imgError.setVisibility(View.INVISIBLE);
         }
 
-        protected void showError() {
+        void showError() {
             tvError.setVisibility(View.VISIBLE);
             imgError.setVisibility(View.VISIBLE);
 
@@ -673,7 +673,11 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 File f = new File(context.getFilesDir(), "avatar");
-                f.createNewFile();
+                boolean fileCreated = f.createNewFile();
+
+                if (!fileCreated) {
+                    throw new IOException("Avatar file not created");
+                }
 
                 //Convert bitmap to byte array
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();

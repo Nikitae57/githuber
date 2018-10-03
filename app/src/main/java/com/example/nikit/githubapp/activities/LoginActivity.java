@@ -25,13 +25,12 @@ import java.net.URL;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText etLogin, etPassword;
-    private View background, loginFormFog;
+    private View loginFormFog;
     private ProgressBar progressBar;
-    private ColorDrawable backgroundColors[];
     private TransitionDrawable colorTransition;
 
     private String login, password;
-    private boolean errorOccured = false;
+    private boolean errorOccurred = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +42,8 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.login_progress_bar);
         loginFormFog = findViewById(R.id.login_auth_fog);
 
-        background = findViewById(R.id.login_background);
-        backgroundColors = new ColorDrawable[]{
+        View background = findViewById(R.id.login_background);
+        ColorDrawable[] backgroundColors = new ColorDrawable[]{
                 new ColorDrawable(Color.WHITE),
                 new ColorDrawable(Color.parseColor("#ff5252"))
         };
@@ -72,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
     private void showProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
         loginFormFog.setVisibility(View.VISIBLE);
-        if (errorOccured) {
+        if (errorOccurred) {
             colorTransition.reverseTransition(500);
         }
     }
@@ -81,7 +80,7 @@ public class LoginActivity extends AppCompatActivity {
         progressBar.setVisibility(View.INVISIBLE);
         loginFormFog.setVisibility(View.GONE);
         colorTransition.startTransition(500);
-        errorOccured = true;
+        errorOccurred = true;
     }
 
     class AuthTask extends AsyncTask<URL, Void, String> {

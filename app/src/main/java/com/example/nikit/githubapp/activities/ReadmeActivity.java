@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -47,9 +48,7 @@ public class ReadmeActivity extends AppCompatActivity {
     private Menu menu;
     private DrawerLayout drawer;
     private NavigationView navView;
-    private View headerView;
     private RecyclerView rvFiles;
-    private RecyclerView.LayoutManager layoutManager;
     private LinearLayout llHomeBack;
 
     private int idShare, idOpenRepo, idStarRepo;
@@ -59,7 +58,6 @@ public class ReadmeActivity extends AppCompatActivity {
             repoFullName,
             repoJsonStr;
     private JSONObject repoJSON;
-    private JSONArray repoFilesArray;
     private URL starRepoUrl, readmeUrl;
     private boolean repoIsChecked;
     private int respondCode;
@@ -76,7 +74,7 @@ public class ReadmeActivity extends AppCompatActivity {
         setToolbarAndActionBar();
         setListeners();
 
-        layoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         rvFiles.setLayoutManager(layoutManager);
 
         new QueryReadmeTask().execute(readmeUrl);
@@ -88,8 +86,10 @@ public class ReadmeActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        }
     }
 
     private void findViews() {
@@ -103,7 +103,7 @@ public class ReadmeActivity extends AppCompatActivity {
         llHomeBack = findViewById(R.id.readme_ll_home_back);
 
         navView = findViewById(R.id.nv_readme_repo_content);
-        headerView = navView.getHeaderView(0);
+        View headerView = navView.getHeaderView(0);
         tvRepoForks = headerView.findViewById(R.id.tv_ReadmeRepoForks);
         tvRepoName = headerView.findViewById(R.id.tv_ReadmeRepoName);
         tvRepoStars = headerView.findViewById(R.id.tv_ReadmeRepoStars);
@@ -123,13 +123,20 @@ public class ReadmeActivity extends AppCompatActivity {
 
         try {
             Bundle extras = receivedIntent.getExtras();
+            if (extras == null) { throw new NullPointerException(); }
+
             repoUrl = extras.getString("repoUrl");
             readmeUrl = new URL(extras.getString("readmeUrl"));
             repoFullName = extras.getString("repoFullName");
             repoJsonStr = extras.getString("repoJSON");
             starRepoUrl = NetworkUtil.makeStarRepoURL(repoFullName);
+
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
+
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+            finish();
         }
 
         try {
@@ -152,7 +159,7 @@ public class ReadmeActivity extends AppCompatActivity {
     private void setListeners() {
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 drawer.closeDrawers();
 
                 if (item.isChecked()) {
@@ -450,7 +457,7 @@ public class ReadmeActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            repoFilesArray = filesArray;
+            JSONArray repoFilesArray = filesArray;
             adapter = new RepoFilesAdapter(repoFilesArray);
             adapter.setFilesClickedListener(new RepoFilesAdapter.FileClickedListener() {
                 @Override

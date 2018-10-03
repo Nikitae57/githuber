@@ -75,9 +75,4 @@ public class Util {
         String parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
         return makeChildCollection(allFiles, parentPath);
     }
-
-    public static void main(String[] args) {
-        String path = ".idea/folder1/folder2";
-        System.out.println(path.substring(0, path.lastIndexOf('/')));
-    }
 }
